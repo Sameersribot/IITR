@@ -69,7 +69,76 @@ body {
     color: var(--secondary-color);
     font-weight: 600;
 }
+.job-card {
+    background: #fff;
+    border-radius: 10px;
+    padding: 20px;
+    margin-bottom: 15px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+}
 
+.job-header {
+    display: flex;
+    align-items: center;
+    margin-bottom: 15px;
+}
+
+.job-avatar {
+    width: 40px;
+    height: 40px;
+    background: #4a90e2;
+    color: white;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: bold;
+    margin-right: 15px;
+}
+
+.job-meta {
+    flex-grow: 1;
+}
+
+.job-title {
+    margin: 0;
+    font-size: 1.2rem;
+}
+
+.job-category {
+    color: #666;
+    font-size: 0.9rem;
+}
+
+.job-details {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+    gap: 10px;
+    margin-bottom: 15px;
+}
+
+.detail-item {
+    background: #f5f7fa;
+    padding: 8px;
+    border-radius: 5px;
+    display: flex;
+    align-items: center;
+}
+
+.job-description p {
+    color: #444;
+    line-height: 1.5;
+    margin-bottom: 15px;
+}
+
+.job-poster {
+    display: flex;
+    justify-content: space-between;
+    font-size: 0.9rem;
+    color: #666;
+    border-top: 1px solid #eee;
+    padding-top: 10px;
+}
 .btn-signup:hover {
     background-color: var(--primary-dark);
     transform: translateY(-2px);

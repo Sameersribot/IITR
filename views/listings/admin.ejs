@@ -4,30 +4,30 @@
   <!-- Sidebar -->
   <div class="sidebar">
     <div class="logo">
-      <h2><span class="logo-icon">✓</span> WorkHub</h2>
+      <h2><span class="logo-icon">✓</span> Workly</h2>
     </div>
-    <div class="menu">
+    <!-- <div class="menu">
       <a href="#" class="menu-item active">
         <span class="menu-icon">📊</span> Dashboard
       </a>
-    </div>
+    </div> -->
   </div>
   
   <!-- Main Content -->
   <div class="main-content">
     <div class="header">
-      <div class="search-bar">
+      <!-- <div class="search-bar">
         <input type="text" placeholder="Search...">
         <button>🔍</button>
-      </div>
+      </div> -->
       <div class="user-menu">
-        <div class="avatar">JD</div>
-        <span>John Doe</span>
+        <div class="avatar"><i class="fa-solid fa-user" style="color: #0efb35;"></i></div>
+        <span><%= user %></span>
       </div>
     </div>
     
     <!-- Stats Section -->
-    <div class="stats-container">
+    <!-- <div class="stats-container">
       <div class="stat-card">
         <div class="stat-title">
           <span class="stat-icon">📊</span>Active Jobs
@@ -56,164 +56,209 @@
         <div class="stat-value">$2,450</div>
         <div>+$650 from last month</div>
       </div>
-    </div>
+    </div> -->
     
     <!-- Post Job Section -->
     <div class="card">
       <div class="card-header">
-        <h3 class="card-title">Post a New Job</h3>
+          <h3 class="card-title" style="color: white; ">Post a New Job</h3>
       </div>
-      <form id="jobPostForm" class="job-form">
-        <div class="form-group">
-          <label class="form-label">Job Title</label>
-          <input type="text" id="jobTitle" class="form-control" placeholder="e.g., Senior Web Developer" required>
-        </div>
-        <div class="form-group">
-          <label class="form-label">Job Description</label>
-          <textarea id="jobDescription" class="form-control" placeholder="Describe the job requirements, responsibilities, and qualifications..." required></textarea>
-        </div>
-        <div class="form-group">
-          <label class="form-label">Category</label>
-          <select id="jobCategory" class="form-select">
-            <option>Web Development</option>
-            <option>Mobile Development</option>
-            <option>UI/UX Design</option>
-            <option>Graphic Design</option>
-            <option>Content Writing</option>
-            <option>Digital Marketing</option>
-            <option>Video Editing</option>
-          </select>
-        </div>
-        <div class="form-group">
-          <label class="form-label">Budget ($)</label>
-          <input type="number" id="jobBudget" class="form-control" placeholder="Enter budget" required>
-        </div>
-        <div class="form-group">
-          <label class="form-label">Deadline</label>
-          <input type="date" id="jobDeadline" class="form-control" required>
-        </div>
-        <div class="form-group">
-          <label class="form-label">Experience Level</label>
-          <select id="jobExperienceLevel" class="form-select">
-            <option>Entry Level</option>
-            <option>Intermediate</option>
-            <option>Expert</option>
-          </select>
-        </div>
-        <div class="form-group">
-          <button type="submit" id="submitJobBtn" class="btn btn-primary">Post Job</button>
-        </div>
-        <div id="jobSubmitStatus"></div>
+      <form id="jobPostForm" action="/jobs" method="POST" class="job-form">
+          
+  
+          <div class="form-group">
+              <label class="form-label">Job Title</label>
+              <input 
+                  type="text" 
+                  name="title" 
+                  class="form-control" 
+                  placeholder="e.g., Senior Web Developer" 
+                  required
+                  value="<%= locals.body && body.title ? body.title : '' %>"
+              >
+          </div>
+  
+          <div class="form-group">
+              <label class="form-label">Job Description</label>
+              <textarea 
+                  name="description" 
+                  class="form-control" 
+                  placeholder="Describe the job requirements, responsibilities, and qualifications..." 
+                  required
+              ><%= locals.body && body.description ? body.description : '' %></textarea>
+          </div>
+  
+          <div class="form-group">
+              <label class="form-label">Category</label>
+              <select name="category" class="form-select">
+                  <% const categories = ['Web Development', 'Mobile Development', 'UI/UX Design', 'Graphic Design', 'Content Writing', 'Digital Marketing', 'Video Editing']; %>
+                  <% categories.forEach(cat => { %>
+                      <option 
+                          value="<%= cat %>"
+                          <%= (locals.body && body.category === cat) ? 'selected' : '' %>
+                      >
+                          <%= cat %>
+                      </option>
+                  <% }); %>
+              </select>
+          </div>
+  
+          <div class="form-group">
+              <label class="form-label">Budget ($)</label>
+              <input 
+                  type="number" 
+                  name="budget" 
+                  class="form-control" 
+                  placeholder="Enter budget" 
+                  min="0" 
+                  required
+                  value="<%= locals.body && body.budget ? body.budget : '' %>"
+              >
+          </div>
+  
+          <div class="form-group">
+              <label class="form-label">Deadline</label>
+              <input 
+                  type="date" 
+                  name="deadline" 
+                  class="form-control" 
+                  required
+                  min="<%= new Date(Date.now() + 86400000).toISOString().split('T')[0] %>"
+                  value="<%= locals.body && body.deadline ? body.deadline : '' %>"
+              >
+          </div>
+  
+          <div class="form-group">
+              <label class="form-label">Experience Level</label>
+              <select name="experienceLevel" class="form-select">
+                  <% const levels = ['Entry Level', 'Intermediate', 'Expert']; %>
+                  <% levels.forEach(level => { %>
+                      <option 
+                          value="<%= level %>"
+                          <%= (locals.body && body.experienceLevel === level) ? 'selected' : '' %>
+                      >
+                          <%= level %>
+                      </option>
+                  <% }); %>
+              </select>
+          </div>
+  
+          <div class="form-group">
+              <button type="submit" class="btn btn-primary">
+                  <span id="submitText">Post Job</span>
+                  <!-- <div id="spinner" class="spinner-border spinner-border-sm d-none" role="status">
+                      <span class="visually-hidden">Loading...</span>
+                  </div> -->
+              </button>
+          </div>
       </form>
-    </div>
+  </div>
   
-<!-- Load Supabase from CDN -->
-<script src="https://unpkg.com/@supabase/supabase-js@2"></script>
-<script>
-document.addEventListener('DOMContentLoaded', function() {
-  console.log('DOM fully loaded');
-  
-  // Check if Supabase is loaded
-  if (typeof supabase === 'undefined') {
-    console.error('Supabase library not loaded!');
-    document.getElementById('jobSubmitStatus').innerHTML = 
-      '<p style="color: red;">Error: Supabase library not loaded. Please check your internet connection.</p>';
-    return;
-  }
 
-  // Initialize Supabase client
-  const supabaseUrl = 'https://qslmebxskpmflhqeokhb.supabase.co';
-  const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InFzbG1lYnhza3BtZmxocWVva2hiIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDI1NTUxNjUsImV4cCI6MjA1ODEzMTE2NX0.DqoQcy7u_ZFPOjmIDpdnFFIjlu-2KSFxFqyeMq3T5PE';
+
+<!-- // document.addEventListener('DOMContentLoaded', function() {
+//   console.log('DOM fully loaded');
   
-  console.log('Creating Supabase client');
-  const supabaseClient = supabase.createClient(supabaseUrl, supabaseKey);
+//   // Check if Supabase is loaded
+//   if (typeof supabase === 'undefined') {
+//     console.error('Supabase library not loaded!');
+//     document.getElementById('jobSubmitStatus').innerHTML = 
+//       '<p style="color: red;">Error: Supabase library not loaded. Please check your internet connection.</p>';
+//     return;
+//   }
+
+//   // Initialize Supabase client
+//   const supabaseUrl = 'https://qslmebxskpmflhqeokhb.supabase.co';
+//   const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InFzbG1lYnhza3BtZmxocWVva2hiIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDI1NTUxNjUsImV4cCI6MjA1ODEzMTE2NX0.DqoQcy7u_ZFPOjmIDpdnFFIjlu-2KSFxFqyeMq3T5PE';
   
-  if (!supabaseClient) {
-    console.error('Failed to initialize Supabase client');
-    document.getElementById('jobSubmitStatus').innerHTML = 
-      '<p style="color: red;">Error: Failed to initialize database connection.</p>';
-    return;
-  }
+//   console.log('Creating Supabase client');
+//   const supabaseClient = supabase.createClient(supabaseUrl, supabaseKey);
   
-  console.log('Supabase client created successfully');
+//   if (!supabaseClient) {
+//     console.error('Failed to initialize Supabase client');
+//     document.getElementById('jobSubmitStatus').innerHTML = 
+//       '<p style="color: red;">Error: Failed to initialize database connection.</p>';
+//     return;
+//   }
   
-  // Get form and submit button elements
-  const jobForm = document.getElementById('jobPostForm');
-  const submitBtn = document.getElementById('submitJobBtn');
-  const statusDiv = document.getElementById('jobSubmitStatus');
+//   console.log('Supabase client created successfully');
   
-  // Add form submit event listener
-  jobForm.addEventListener('submit', async function(e) {
-    e.preventDefault();
-    console.log('Form submission started');
+//   // Get form and submit button elements
+//   const jobForm = document.getElementById('jobPostForm');
+//   const submitBtn = document.getElementById('submitJobBtn');
+//   const statusDiv = document.getElementById('jobSubmitStatus');
+  
+//   // Add form submit event listener
+//   jobForm.addEventListener('submit', async function(e) {
+//     e.preventDefault();
+//     console.log('Form submission started');
     
-    // Update button state
-    submitBtn.disabled = true;
-    submitBtn.textContent = 'Posting...';
-    statusDiv.innerHTML = '<p style="color: blue;">Submitting job post...</p>';
+//     // Update button state
+//     submitBtn.disabled = true;
+//     submitBtn.textContent = 'Posting...';
+//     statusDiv.innerHTML = '<p style="color: blue;">Submitting job post...</p>';
     
-    try {
-      // Get form values using IDs
-      const title = document.getElementById('jobTitle').value.trim();
-      const description = document.getElementById('jobDescription').value.trim();
-      const category = document.getElementById('jobCategory').value;
-      const budget = document.getElementById('jobBudget').value;
-      const deadline = document.getElementById('jobDeadline').value;
-      const experienceLevel = document.getElementById('jobExperienceLevel').value;
+//     try {
+//       // Get form values using IDs
+//       const title = document.getElementById('jobTitle').value.trim();
+//       const description = document.getElementById('jobDescription').value.trim();
+//       const category = document.getElementById('jobCategory').value;
+//       const budget = document.getElementById('jobBudget').value;
+//       const deadline = document.getElementById('jobDeadline').value;
+//       const experienceLevel = document.getElementById('jobExperienceLevel').value;
       
-      console.log('Form data collected:', { title, description, category, budget, deadline, experienceLevel });
+//       console.log('Form data collected:', { title, description, category, budget, deadline, experienceLevel });
       
-      // Validation
-      if (!title || !description || !budget || !deadline) {
-        throw new Error('Please fill in all required fields');
-      }
+//       // Validation
+//       if (!title || !description || !budget || !deadline) {
+//         throw new Error('Please fill in all required fields');
+//       }
       
-      // Create job data object
-      const jobData = {
-        title,
-        description,
-        category,
-        budget: parseFloat(budget),
-        deadline,
-        experience_level: experienceLevel,
-      };
+//       // Create job data object
+//       const jobData = {
+//         title,
+//         description,
+//         category,
+//         budget: parseFloat(budget),
+//         deadline,
+//         experience_level: experienceLevel,
+//       };
       
-      console.log('Preparing to insert job data:', jobData);
-      statusDiv.innerHTML = '<p style="color: blue;">Connecting to database...</p>';
+//       console.log('Preparing to insert job data:', jobData);
+//       statusDiv.innerHTML = '<p style="color: blue;">Connecting to database...</p>';
       
-      // Insert into Supabase with better error handling
-      const { data, error } = await supabaseClient
-        .from('jobs')
-        .insert([jobData]);
+//       // Insert into Supabase with better error handling
+//       const { data, error } = await supabaseClient
+//         .from('jobs')
+//         .insert([jobData]);
       
-      console.log('Insert response:', { data, error });
+//       console.log('Insert response:', { data, error });
       
-      if (error) {
-        throw new Error(error.message || 'Database error occurred');
-      }
+//       if (error) {
+//         throw new Error(error.message || 'Database error occurred');
+//       }
       
-      // Success handling
-      console.log('Job posted successfully');
-      statusDiv.innerHTML = '<p style="color: green;">Job posted successfully!</p>';
-      submitBtn.textContent = 'Posted!';
+//       // Success handling
+//       console.log('Job posted successfully');
+//       statusDiv.innerHTML = '<p style="color: green;">Job posted successfully!</p>';
+//       submitBtn.textContent = 'Posted!';
       
-      // Reset form and button state
-      jobForm.reset();
-      setTimeout(() => {
-        submitBtn.disabled = false;
-        submitBtn.textContent = 'Post Job';
-        statusDiv.innerHTML = '';
-      }, 2000);
+//       // Reset form and button state
+//       jobForm.reset();
+//       setTimeout(() => {
+//         submitBtn.disabled = false;
+//         submitBtn.textContent = 'Post Job';
+//         statusDiv.innerHTML = '';
+//       }, 2000);
       
-    } catch (error) {
-      // Error handling
-      console.error('Error posting job:', error);
-      statusDiv.innerHTML = `<p style="color: red;">Error: ${error.message}</p>`;
-      submitBtn.disabled = false;
-      submitBtn.textContent = 'Post Job';
-    }
-  });
+//     } catch (error) {
+//       // Error handling
+//       console.error('Error posting job:', error);
+//       statusDiv.innerHTML = `<p style="color: red;">Error: ${error.message}</p>`;
+//       submitBtn.disabled = false;
+//       submitBtn.textContent = 'Post Job';
+//     }
+//   });
   
-  console.log('Event listeners set up successfully');
-});
-</script>
+//   console.log('Event listeners set up successfully');
+// }); -->

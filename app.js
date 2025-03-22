@@ -5,10 +5,14 @@ const ejsMate = require("ejs-mate")
 const mongoose = require("mongoose")
 const mongo_url = "mongodb://127.0.0.1:27017/IITR"
 const flash = require("connect-flash")
+
+const ExpressError = require("./utils/ExpressError.js")
 const session = require("express-session")
 const passport = require("passport")
 const localStrategy = require("passport-local")
 const User=require("./models/user.js")
+const Job=require("./models/job.js")
+const Checkpoint = require('./models/checkpoint.js');
 const wrapAsync = require("./utils/wrapAsync.js")
 main()
     .then(() => {
@@ -58,13 +62,13 @@ app.use((req, res, next) => {
     next()
 })
 
-app.get("/", (req, res) => {
-
-    res.render("listings/index.ejs")
-})
+app.get("/", wrapAsync(async(req, res) => {
+    const jobs = await Job.find({}) .populate('postedBy', 'username') // Populate the poster's username
+    .sort({ createdAt: -1 });
+    res.render("listings/index.ejs", { jobs });
+}));
 
 app.get("/payment", (req, res) => {
-
     res.render("listings/payment.ejs")
 })
 
@@ -73,25 +77,56 @@ app.get("/admin", (req, res) => {
     res.render("listings/admin.ejs")
 })
 
-app.post("/signup", wrapAsync(async (req, res) => {
-        console.log(req.body)
-        try {
-            let { username, email, password } = req.body
-            const newuser = new User({ email, username })
-            const registereduser = await User.register(newuser, password)
 
-            req.login(registereduser, (err) => {
-                if (err) {
-                    
-                    return next()
-                }
-                req.flash("sucess", "welcome to freelancer")
-                res.redirect("/")
-            })
+app.post("/signup", wrapAsync(async (req, res, next) => {
+    try {
+        const { username, email, password } = req.body;
+        
+        // Create user using passport-local-mongoose's register method
+        const registeredUser = await User.register(
+            { username, email }, // Plain object, not User instance
+            password
+        );
+
+        console.log("Registered user:", registeredUser); // Add this for debugging
+        
+        req.login(registeredUser, (err) => {
+            if (err) return next(err);
+            req.flash("success", "Welcome to GreenApp!");
+            res.redirect("/");
+        });
+    } catch (e) {
+        console.error("Registration error:", e);
+        req.flash("error", e.message);
+        res.redirect("/");
+    }
+}));
+
+
+
+app.post("/login", 
+    passport.authenticate("local", { 
+      failureRedirect: '/login',
+      failureFlash: true,
+      successRedirect: '/',
+      successFlash: "Welcome back!"
+    })
+  );
+
+  app.post("/logout", (req, res, next) => {
+    req.logOut((err) => {
+        if (err) {
+            return next(err)
         }
-        catch (e) {
-            console.log(e)
-            req.flash("error", e.message)
-            res.redirect("/")
-        }
-}))
+        req.flash("sucess", "Logout sucessfull")
+        res.redirect("/")
+    })
+})  
+app.all("*", (req, res, next) => {
+    next(new ExpressError(404, "page not found"))
+})
+app.use((err, req, res, next) => {
+    let { statusCode = 500, message = "something went wrong" } = err
+    // res.status(statusCode).send(message)
+    res.render("listings/error.ejs", { statusCode, message })
+})

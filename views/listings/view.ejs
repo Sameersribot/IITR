@@ -1,0 +1,140 @@
+<% layout("/layouts/boilerPlate") %>
+
+<div class="job-detail-container">
+    <div class="jd-header">
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+        <h1><%= job.title %></h1>
+        <button class="jd-btn-outline" style="width: 7vw; height: 7vh;"   onclick="window.history.back()">Back to Jobs</button>
+      </div>
+      <div class="jd-meta">
+        <div class="jd-meta-item">
+          <span class="jd-label">Posted By</span>
+          <div class="user-info">
+            <div class="jd-user-avatar">
+              <%= job.postedBy.username.split(' ').map(n => n[0]).join('').slice(0, 2) %>
+            </div>
+            <span class="jd-value"><%= job.postedBy.username %></span>
+          </div>
+        </div>
+        <div class="jd-meta-item">
+          <span class="jd-label">Posted On</span>
+          <span class="jd-value">
+            <%= job.createdAt.toLocaleDateString('en-US', { 
+              year: 'numeric', 
+              month: 'long', 
+              day: 'numeric' 
+            }) %>
+          </span>
+        </div>
+        <div class="jd-meta-item">
+          <span class="jd-label">Deadline</span>
+          <div class="deadline">
+            <span class="jd-value deadline-urgent">
+              <%= job.deadline.toLocaleDateString('en-US', {
+                year: 'numeric',
+                month: 'long',
+                day: 'numeric'
+              }) %>
+            </span>
+            <span>
+              (<%= Math.ceil((job.deadline - Date.now()) / (1000 * 60 * 60 * 24)) %> days remaining)
+            </span>
+          </div>
+        </div>
+        <div class="jd-meta-item">
+          <span class="jd-label">Category</span>
+          <span class="jd-value"><%= job.category %></span>
+        </div>
+        <div class="jd-meta-item">
+          <span class="jd-label">Experience Level</span>
+          <span class="jd-value"><%= job.experienceLevel %></span>
+        </div>
+      </div>
+    </div>
+    
+    <div class="jd-main-card">
+      <div class="jd-section">
+        <h2>Job Description</h2>
+        <div class="jd-description">
+          <p><%= job.description %></p>
+        </div>
+      </div>
+      
+      <div class="jd-section">
+        <h3>Job Details</h3>
+        <div class="jd-tags">
+          <span class="jd-tag">Budget: $<%= job.budget.toLocaleString() %></span>
+          <span class="jd-tag"><%= job.category %></span>
+          <span class="jd-tag"><%= job.experienceLevel %></span>
+        </div>
+      </div>
+      
+      <div class="jd-section">
+        <h3>Key Information</h3>
+        <div class="jd-detail-item">
+          <div class="jd-icon">💰</div>
+          <div>
+            <h4>Budget</h4>
+            <p>$<%= job.budget.toLocaleString() %></p>
+          </div>
+        </div>
+        <div class="jd-detail-item">
+          <div class="jd-icon">📅</div>
+          <div>
+            <h4>Deadline</h4>
+            <p>
+              <%= job.deadline.toLocaleDateString('en-US', {
+                year: 'numeric',
+                month: 'long',
+                day: 'numeric'
+              }) %>
+            </p>
+          </div>
+        </div>
+      </div>
+
+      <% if (job.postedBy) { %>
+        <div class="jd-section">
+          <h3>Client Information</h3>
+          <div class="jd-detail-item">
+            <div class="jd-user-avatar">
+                
+              <%= job.postedBy.username.split(' ').map(n => n[0]).join('').slice(0, 2) %>
+            </div>
+            <div>
+              <h4><%= job.postedBy.username %></h4>
+              <p>Member since: 
+                <%= job.postedBy.createdAt.toLocaleDateString('en-US', {
+                  year: 'numeric',
+                  month: 'short'
+                }) %>
+              </p>
+              <% if (job.postedBy.email) { %>
+                <p>📧 <%= job.postedBy.email %></p>
+              <% } %>
+            </div>
+          </div>
+        </div>
+        <div class="jd-action-bar">
+            <form action="/checkpoint/<%= job._id%>" method="get"> <button class="jd-btn-primary"style="width: 10vw; height: 7vh; border:none" >Apply</button></form>
+        </div>
+      <% } %>
+      
+      
+    </div>
+</div>
+
+<script>
+    // document.addEventListener('DOMContentLoaded', function() {
+    //   const applyBtn = document.querySelector('.jd-btn-primary');
+    //   applyBtn.addEventListener('click', function() {
+    //     if (confirm('Are you sure you want to apply for this job?')) {
+    //       // Add your application logic here
+    //       alert('Application submitted successfully!');
+    //       applyBtn.textContent = "Applied";
+    //       applyBtn.disabled = true;
+    //       applyBtn.style.backgroundColor = "#757575";
+    //     }
+    //   });
+    // });
+</script>

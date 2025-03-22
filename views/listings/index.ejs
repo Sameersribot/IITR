@@ -3,11 +3,14 @@
 
 <body>
     <nav class="navbar">
-        <div class="logo">GreenApp</div>
+        <div class="logo">Workly</div>
         <div class="auth-buttons">
             <% if (currUser) { %>
                 <form action="/logout" method="post">
                     <button class="btn btn-logout" type="submit">Logout</button>
+                </form>
+                <form action="/postjob" method="get">
+                    <button class="btn" type="submit">Post Job</button>
                 </form>
             <% } else { %>
                 <button class="btn btn-login" onclick="openModal('login')">Login</button>
@@ -19,31 +22,72 @@
     <!-- Main container with employee directory -->
     <div class="container">
         <div class="header">
-            <h1 class="page-title">Employee Directory</h1>
-            <div class="search-container">
-                <span class="search-icon">🔍</span>
-                <input type="text" class="search-input" placeholder="Search employees..." id="search-input">
-            </div>
+            <h1 class="page-title">Listings</h1>
+           
         </div>
 
-        <div class="filters">
-            <button class="filter-btn active">All</button>
-            <button class="filter-btn">Engineering</button>
-            <button class="filter-btn">Marketing</button>
-            <button class="filter-btn">Design</button>
-            <button class="filter-btn">Sales</button>
-            <button class="filter-btn">Product</button>
-        </div>
+       
 
-        <div class="recycler-view" id="employee-list">
-            <!-- Employee cards will be added here -->
-            <!-- Empty state shown when not logged in -->
-            <div class="empty-state" id="empty-state">
-                <div class="empty-icon">👥</div>
-                <div class="empty-text">Login to view the employee directory and manage your team</div>
-                <button class="empty-action" onclick="openModal('login')">Login Now</button>
-            </div>
+        <div class="recycler-view" id="job-list">
+            <% if(jobs && jobs.length > 0) { %>
+                <% jobs.forEach(job => { %>
+                    <div class="job-card">
+                        <div class="job-header">
+                            <div class="job-avatar">
+                                <%= job.title.split(' ').map(n => n[0]).join('').slice(0, 2) %>
+                            </div>
+                            <div class="job-meta">
+                                <h3 class="job-title"><%= job.title %></h3>
+                                <div class="job-category"><%= job.category %></div>
+                            </div>
+                        </div>
+                        
+                        <div class="job-details">
+                            <div class="detail-item">
+                                <span class="detail-icon">💰</span>
+                                <span class="detail-value">$<%= job.budget.toLocaleString() %></span>
+                            </div>
+                            <div class="detail-item">
+                                <span class="detail-icon">📅</span>
+                                <span class="detail-value">
+                                    <%= job.deadline.toLocaleDateString('en-US', { 
+                                        year: 'numeric', 
+                                        month: 'short', 
+                                        day: 'numeric' 
+                                    }) %>
+                                </span>
+                            </div>
+                            <div class="detail-item">
+                                <span class="detail-icon">📌</span>
+                                <span class="detail-value"><%= job.experienceLevel %> Level</span>
+                            </div>
+                        </div>
+        
+                        <div class="job-description">
+                            <p><%= job.description.substring(0, 100) %>...</p>
+                        </div>
+                       <form action="/jobs/<%= job._id %>"><button class="btn">View</button></form> 
+                        
+                        <br><br>
+                        <% if (job.postedBy && job.postedBy.username) { %>
+                            <div class="job-poster">
+                                <span class="posted-by">Posted by: <%= job.postedBy.username %></span>
+                                <span class="post-date">
+                                    <%= job.createdAt.toLocaleDateString() %>
+                                </span>
+                            </div>
+                        <% } %>
+                    </div>
+                <% }); %>
+            <% } else { %>
+                <div class="empty-state">
+                    <div class="empty-icon">📭</div>
+                    <div class="empty-text">No job postings available</div>
+                    <div class="empty-subtext">Check back later or post a new job!</div>
+                </div>
+            <% } %>
         </div>
+        
 
         <div class="pagination" id="pagination">
             <button class="page-btn disabled">«</button>
@@ -98,189 +142,189 @@
   
 </body>
 
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<!-- <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script> -->
 <script>
 
 // Initialize Supabase
-const supabase = supabaseClient.createClient(
-    'https://qslmebxskpmflhqeokhb.supabase.co',
-    'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InFzbG1lYnhza3BtZmxocWVva2hiIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDI1NTUxNjUsImV4cCI6MjA1ODEzMTE2NX0.DqoQcy7u_ZFPOjmIDpdnFFIjlu-2KSFxFqyeMq3T5PE'
-);
+// const supabase = supabaseClient.createClient(
+//     'https://qslmebxskpmflhqeokhb.supabase.co',
+//     'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InFzbG1lYnhza3BtZmxocWVva2hiIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDI1NTUxNjUsImV4cCI6MjA1ODEzMTE2NX0.DqoQcy7u_ZFPOjmIDpdnFFIjlu-2KSFxFqyeMq3T5PE'
+// );
 
-let employees = [];
-let searchTerm = '';
-let currentFilter = 'All';
-let isLoggedIn = false;
+// let employees = [];
+// let searchTerm = '';
+// let currentFilter = 'All';
+// let isLoggedIn = false;
 
 // Function to fetch employees from Supabase
-async function fetchEmployees() {
-    try {
-        const { data, error } = await supabase
-            .from('jobs')
-            .select('*')
-            .order('name', { ascending: true });
+// async function fetchEmployees() {
+//     try {
+//         const { data, error } = await supabase
+//             .from('jobs')
+//             .select('*')
+//             .order('name', { ascending: true });
 
-        if (error) throw error;
-        if (data && data.length > 0) return data;
+//         if (error) throw error;
+//         if (data && data.length > 0) return data;
         
-        console.warn("No data from Supabase, using sample data");
-        // Return your sample data as fallback
-        return [
-            {
-                id: 1,
-                name: "John Smith",
-                position: "Senior Software Engineer",
-                department: "Engineering",
-                salary: 115000,
-                email: "john.smith@company.com",
-                phone: "(555) 123-4567",
-                location: "San Francisco, CA",
-                startDate: "Mar 15, 2019"
-            },
-            // Add other sample employees...
-        ];
-    } catch (error) {
-        console.error('Error fetching employees:', error);
-        // Return sample data as fallback
-        return [
-            {
-                id: 1,
-                name: "John Smith",
-                position: "Senior Software Engineer",
-                department: "Engineering",
-                salary: 115000,
-                email: "john.smith@company.com",
-                phone: "(555) 123-4567",
-                location: "San Francisco, CA",
-                startDate: "Mar 15, 2019"
-            },
-            // Add other sample employees...
-        ];
-    }
-}
+//         console.warn("No data from Supabase, using sample data");
+//         // Return your sample data as fallback
+//         return [
+//             {
+//                 id: 1,
+//                 name: "John Smith",
+//                 position: "Senior Software Engineer",
+//                 department: "Engineering",
+//                 salary: 115000,
+//                 email: "john.smith@company.com",
+//                 phone: "(555) 123-4567",
+//                 location: "San Francisco, CA",
+//                 startDate: "Mar 15, 2019"
+//             },
+//             // Add other sample employees...
+//         ];
+//     } catch (error) {
+//         console.error('Error fetching employees:', error);
+//         // Return sample data as fallback
+//         return [
+//             {
+//                 id: 1,
+//                 name: "John Smith",
+//                 position: "Senior Software Engineer",
+//                 department: "Engineering",
+//                 salary: 115000,
+//                 email: "john.smith@company.com",
+//                 phone: "(555) 123-4567",
+//                 location: "San Francisco, CA",
+//                 startDate: "Mar 15, 2019"
+//             },
+//             // Add other sample employees...
+//         ];
+//     }
+// }
 
 // Function to format salary
-function formatSalary(salary) {
-    return '$' + salary.toLocaleString();
-}
+// function formatSalary(salary) {
+//     return '$' + salary.toLocaleString();
+// }
 
 // Function to get initials from name
-function getInitials(name) {
-    return name.split(' ').map(n => n[0]).join('');
-}
+// function getInitials(name) {
+//     return name.split(' ').map(n => n[0]).join('');
+// }
 
 // Filter function to work with Supabase data
-function filterEmployees() {
-    return employees.filter(employee => {
-        const matchesSearch = employee.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-            employee.position.toLowerCase().includes(searchTerm.toLowerCase()) ||
-            employee.email.toLowerCase().includes(searchTerm.toLowerCase());
+// function filterEmployees() {
+//     return employees.filter(employee => {
+//         const matchesSearch = employee.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+//             employee.position.toLowerCase().includes(searchTerm.toLowerCase()) ||
+//             employee.email.toLowerCase().includes(searchTerm.toLowerCase());
         
-        const matchesFilter = currentFilter === 'All' || 
-            employee.department === currentFilter;
+//         const matchesFilter = currentFilter === 'All' || 
+//             employee.department === currentFilter;
         
-        return matchesSearch && matchesFilter;
-    });
-}
+//         return matchesSearch && matchesFilter;
+//     });
+// }
 
-async function renderEmployees() {
-    const employeeList = document.getElementById('employee-list');
-    const emptyState = document.getElementById('empty-state');
-    const pagination = document.getElementById('pagination');
+// async function renderEmployees() {
+//     const employeeList = document.getElementById('employee-list');
+//     const emptyState = document.getElementById('empty-state');
+//     const pagination = document.getElementById('pagination');
     
-    // Show loading state
-    employeeList.innerHTML = '<div class="loading">Loading employees...</div>';
-    console.log("Starting to render employees");
+//     // Show loading state
+//     employeeList.innerHTML = '<div class="loading">Loading employees...</div>';
+//     console.log("Starting to render employees");
 
-    try {
-        // Fetch employees from Supabase if we don't have them yet
-        if (employees.length === 0) {
-            console.log("No employees in cache, fetching from Supabase");
-            employees = await fetchEmployees();
-            console.log(`Fetched ${employees.length} employees`);
-        }
+//     try {
+//         // Fetch employees from Supabase if we don't have them yet
+//         if (employees.length === 0) {
+//             console.log("No employees in cache, fetching from Supabase");
+//             employees = await fetchEmployees();
+//             console.log(`Fetched ${employees.length} employees`);
+//         }
         
-        // Hide empty state
-        emptyState.style.display = 'none';
+//         // Hide empty state
+//         emptyState.style.display = 'none';
         
-        const filteredEmployees = filterEmployees();
-        console.log(`Filtered to ${filteredEmployees.length} employees`);
+//         const filteredEmployees = filterEmployees();
+//         console.log(`Filtered to ${filteredEmployees.length} employees`);
         
-        pagination.style.display = filteredEmployees.length > 0 ? 'flex' : 'none';
+//         pagination.style.display = filteredEmployees.length > 0 ? 'flex' : 'none';
         
-        employeeList.innerHTML = '';
+//         employeeList.innerHTML = '';
         
-        if (filteredEmployees.length === 0) {
-            console.log("No employees match filters");
-            const noResults = document.createElement('div');
-            noResults.className = 'empty-state';
-            noResults.innerHTML = `
-                <div class="empty-icon">🔎</div>
-                <div class="empty-text">No employees found. Try adjusting your filters or search term.</div>
-            `;
-            employeeList.appendChild(noResults);
-            return;
-        }
+//         if (filteredEmployees.length === 0) {
+//             console.log("No employees match filters");
+//             const noResults = document.createElement('div');
+//             noResults.className = 'empty-state';
+//             noResults.innerHTML = `
+//                 <div class="empty-icon">🔎</div>
+//                 <div class="empty-text">No employees found. Try adjusting your filters or search term.</div>
+//             `;
+//             employeeList.appendChild(noResults);
+//             return;
+//         }
         
-        console.log("Creating employee cards for display");
-        filteredEmployees.forEach(employee => {
-            // Before creating card, check if employee has all needed fields
-            if (!employee.name || !employee.position || !employee.email) {
-                console.warn("Employee missing required fields:", employee);
-            }
+//         console.log("Creating employee cards for display");
+//         filteredEmployees.forEach(employee => {
+//             // Before creating card, check if employee has all needed fields
+//             if (!employee.name || !employee.position || !employee.email) {
+//                 console.warn("Employee missing required fields:", employee);
+//             }
             
-            // Add fallbacks for potentially missing fields
-            const card = document.createElement('div');
-            card.className = 'employee-card';
-            card.innerHTML = `
-                <div class="employee-avatar">${employee.name ? getInitials(employee.name) : '??'}</div>
-                <div class="employee-info">
-                    <div class="employee-name">${employee.name || 'Unknown'}</div>
-                    <div class="employee-position">${employee.position || 'No position'}</div>
-                    <div class="employee-details">
-                        <div class="detail-item">
-                            <span class="detail-icon">📧</span>
-                            <span class="detail-value">${employee.email || 'No email'}</span>
-                        </div>
-                        <div class="detail-item">
-                            <span class="detail-icon">📱</span>
-                            <span class="detail-value">${employee.phone || 'No phone'}</span>
-                        </div>
-                        <div class="detail-item">
-                            <span class="detail-icon">📍</span>
-                            <span class="detail-value">${employee.location || 'No location'}</span>
-                        </div>
-                        <div class="detail-item">
-                            <span class="detail-icon">🗓</span>
-                            <span class="detail-label">Started:</span>
-                            <span class="detail-value">${employee.startDate || 'Unknown'}</span>
-                        </div>
-                        <div class="detail-item">
-                            <span class="detail-icon">🏢</span>
-                            <span class="detail-value">${employee.department || 'No department'}</span>
-                        </div>
-                    </div>
-                </div>
-                <div class="employee-action">
-                    <div class="salary">${employee.salary ? formatSalary(employee.salary) : 'N/A'}</div>
-                    <button class="view-btn">View Profile</button>
-                </div>
-            `;
-            employeeList.appendChild(card);
-        });
-        console.log("Employee rendering complete");
+//             // Add fallbacks for potentially missing fields
+//             const card = document.createElement('div');
+//             card.className = 'employee-card';
+//             card.innerHTML = `
+//                 <div class="employee-avatar">${employee.name ? getInitials(employee.name) : '??'}</div>
+//                 <div class="employee-info">
+//                     <div class="employee-name">${employee.name || 'Unknown'}</div>
+//                     <div class="employee-position">${employee.position || 'No position'}</div>
+//                     <div class="employee-details">
+//                         <div class="detail-item">
+//                             <span class="detail-icon">📧</span>
+//                             <span class="detail-value">${employee.email || 'No email'}</span>
+//                         </div>
+//                         <div class="detail-item">
+//                             <span class="detail-icon">📱</span>
+//                             <span class="detail-value">${employee.phone || 'No phone'}</span>
+//                         </div>
+//                         <div class="detail-item">
+//                             <span class="detail-icon">📍</span>
+//                             <span class="detail-value">${employee.location || 'No location'}</span>
+//                         </div>
+//                         <div class="detail-item">
+//                             <span class="detail-icon">🗓</span>
+//                             <span class="detail-label">Started:</span>
+//                             <span class="detail-value">${employee.startDate || 'Unknown'}</span>
+//                         </div>
+//                         <div class="detail-item">
+//                             <span class="detail-icon">🏢</span>
+//                             <span class="detail-value">${employee.department || 'No department'}</span>
+//                         </div>
+//                     </div>
+//                 </div>
+//                 <div class="employee-action">
+//                     <div class="salary">${employee.salary ? formatSalary(employee.salary) : 'N/A'}</div>
+//                     <button class="view-btn">View Profile</button>
+//                 </div>
+//             `;
+//             employeeList.appendChild(card);
+//         });
+//         console.log("Employee rendering complete");
 
-    } catch (error) {
-        console.error('Error rendering employees:', error);
-        employeeList.innerHTML = `
-            <div class="error-state">
-                <div class="error-icon">⚠️</div>
-                <div class="error-text">Failed to load employees. Please try again later.</div>
-                <div class="error-details">Error: ${error.message}</div>
-            </div>
-        `;
-    }
-}
+//     } catch (error) {
+//         console.error('Error rendering employees:', error);
+//         employeeList.innerHTML = `
+//             <div class="error-state">
+//                 <div class="error-icon">⚠️</div>
+//                 <div class="error-text">Failed to load employees. Please try again later.</div>
+//                 <div class="error-details">Error: ${error.message}</div>
+//             </div>
+//         `;
+//     }
+// }
 
 
 // Function to open modal
@@ -318,12 +362,12 @@ filterButtons.forEach(button => {
 });
 
     // Handle login form submission
-    document.getElementById('login-form').addEventListener('submit', function(e) {
-        e.preventDefault();
-        isLoggedIn = true;
-        closeModal('login');
-        renderEmployees();
-    });
+    // document.getElementById('login-form').addEventListener('submit', function(e) {
+    //     e.preventDefault();
+    //     isLoggedIn = true;
+    //     closeModal('login');
+    //     renderEmployees();
+    // });
 
     // Handle signup form submission
     // document.getElementById('signup-form').addEventListener('submit', function(e) {
