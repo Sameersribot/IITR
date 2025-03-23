@@ -5,7 +5,7 @@ const ejsMate = require("ejs-mate")
 const mongoose = require("mongoose")
 const mongo_url = "mongodb+srv://admin:lGLO2T8SYL57vJFL@cluster0.yj83q.mongodb.net/?retryWrites=true&w=majority&appName=Cluster"
 const flash = require("connect-flash")
-
+const { isLoggedin } = require("./middleware.js")
 const ExpressError = require("./utils/ExpressError.js")
 const session = require("express-session")
 const passport = require("passport")
@@ -72,12 +72,35 @@ app.get("/payment", (req, res) => {
     res.render("listings/payment.ejs")
 })
 
-app.get("/admin", (req, res) => {
+app.get("/postjob", isLoggedin, (req, res) => {
+    const user=req.user.username
+    console.log(user)
+    res.render("listings/admin.ejs",{user});
+});
 
-    res.render("listings/admin.ejs")
-})
+// View Single Job Route
+app.get("/jobs/:id", wrapAsync(async (req, res) => {
+    const job = await Job.findById(req.params.id)
+        .populate('postedBy', 'username email createdAt');
+    
+    if (!job) {
+        req.flash('error', 'Job not found');
+        return res.redirect('/');
+    }
+    
+    res.render("listings/view.ejs", { job });
+}));
+// View Single Checkpoint Route
 
-
+app.post('/checkpoints',  async (req, res) => {
+    try {
+      const checkpoint = new Checkpoint(req.body);
+      await checkpoint.save();
+      res.status(201).send(checkpoint);
+    } catch (error) {
+      res.status(400).send(error);
+    }
+  });
 app.post("/signup", wrapAsync(async (req, res, next) => {
     try {
         const { username, email, password } = req.body;
@@ -205,30 +228,37 @@ app.post("/jobs/:id/refresh-checkpoints", wrapAsync(async (req, res) => {
     res.json(job.checkpoints);
 }));
 app.post("/submitcheckpoints", wrapAsync(async (req, res) => {
-    const { name, type, description, price, jobId } = req.body;
+    // Destructure giturl from request body
+    const { name, type, description, price, jobId, giturl } = req.body;
+    
+    // Validate giturl format
+    if (!giturl || !giturl.match(/https:\/\/github.com\/.*\/commit\/[a-f0-9]{40}/)) {
+        throw new ExpressError(400, 'Valid GitHub commit URL is required');
+    }
+
+    // Handle commit dependencies
     const commitDependencies = Array.isArray(req.body.commitDependencies) 
         ? req.body.commitDependencies 
         : [req.body.commitDependencies];
 
-    // Validation
-    if (!name || !type || !price || !jobId) {
-        throw new ExpressError(400, 'Missing required fields');
-    }
-
+    // Create new checkpoint with giturl
     const newCheckpoint = new Checkpoint({
         name,
         type,
         description,
         price: parseFloat(price),
+        giturl, // Include giturl here
         commitDependencies: commitDependencies.filter(Boolean),
         jobId
     });
 
+    // Validate against job budget
     const job = await Job.findById(jobId);
     if (newCheckpoint.price > job.budget) {
         throw new ExpressError(400, `Price exceeds job budget of $${job.budget}`);
     }
 
+    // Save and update job
     await newCheckpoint.save();
     await Job.findByIdAndUpdate(jobId, { $push: { checkpoints: newCheckpoint._id } });
 
