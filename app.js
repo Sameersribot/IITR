@@ -228,30 +228,37 @@ app.post("/jobs/:id/refresh-checkpoints", wrapAsync(async (req, res) => {
     res.json(job.checkpoints);
 }));
 app.post("/submitcheckpoints", wrapAsync(async (req, res) => {
-    const { name, type, description, price, jobId } = req.body;
+    // Destructure giturl from request body
+    const { name, type, description, price, jobId, giturl } = req.body;
+    
+    // Validate giturl format
+    if (!giturl || !giturl.match(/https:\/\/github.com\/.*\/commit\/[a-f0-9]{40}/)) {
+        throw new ExpressError(400, 'Valid GitHub commit URL is required');
+    }
+
+    // Handle commit dependencies
     const commitDependencies = Array.isArray(req.body.commitDependencies) 
         ? req.body.commitDependencies 
         : [req.body.commitDependencies];
 
-    // Validation
-    if (!name || !type || !price || !jobId) {
-        throw new ExpressError(400, 'Missing required fields');
-    }
-
+    // Create new checkpoint with giturl
     const newCheckpoint = new Checkpoint({
         name,
         type,
         description,
         price: parseFloat(price),
+        giturl, // Include giturl here
         commitDependencies: commitDependencies.filter(Boolean),
         jobId
     });
 
+    // Validate against job budget
     const job = await Job.findById(jobId);
     if (newCheckpoint.price > job.budget) {
         throw new ExpressError(400, `Price exceeds job budget of $${job.budget}`);
     }
 
+    // Save and update job
     await newCheckpoint.save();
     await Job.findByIdAndUpdate(jobId, { $push: { checkpoints: newCheckpoint._id } });
 
