@@ -65,13 +65,22 @@ app.use((req, res, next) => {
 app.get("/", wrapAsync(async(req, res) => {
     const jobs = await Job.find({}) .populate('postedBy', 'username') // Populate the poster's username
     .sort({ createdAt: -1 });
+    
     res.render("listings/index.ejs", { jobs });
 }));
 
-app.get("/payment", (req, res) => {
-    res.render("listings/payment.ejs")
+app.get("/payment", async(req, res) => {
+    const checkpoints = await Checkpoint.find()
+    .populate('dependencies')
+    .populate('jobId');
+    res.render("listings/payment.ejs",{checkpoints})
 })
-
+app.get("/postedjob", async (req, res) => {
+    const jobs = await Job.find({}) .populate('postedBy', 'username') // Populate the poster's username
+    .sort({ createdAt: -1 });
+    
+    res.render("listings/posted.ejs", { jobs });
+});
 app.get("/postjob", isLoggedin, (req, res) => {
     const user=req.user.username
     console.log(user)

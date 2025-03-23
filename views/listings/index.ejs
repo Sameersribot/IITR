@@ -12,10 +12,14 @@
                 <form action="/postjob" method="get">
                     <button class="btn" type="submit">Post Job</button>
                 </form>
+                <form action="/postedjob/<%= jobs._id %>" method="get">
+                    <button class="btn" type="submit">Posted Job</button>
+                </form>
             <% } else { %>
                 <button class="btn btn-login" onclick="openModal('login')">Login</button>
                 <button class="btn btn-signup" onclick="openModal('signup')">Sign Up</button>
             <% } %>
+            
         </div>
     </nav>
 
@@ -395,4 +399,5 @@ window.addEventListener('click', function(e) {
 document.addEventListener('DOMContentLoaded', async () => {
     await renderEmployees();
 });
+
 </script>

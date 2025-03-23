@@ -1,163 +1,132 @@
 <% layout("/layouts/boilerPlate") %>
-
-<header>
-    <div class="container header-content">
-      <div class="logo">FreelanceFlow</div>
-      <div class="user-info">
-        <span>Sarah Johnson</span>
-        <div class="user-avatar">SJ</div>
-      </div>
-    </div>
-  </header>
-
-  <main class="container">
-    <div class="card">
-      <div class="card-header">Freelancer Payment</div>
-      <div class="card-body">
-        <div class="freelancer-info">
-          <div class="freelancer-avatar">JD</div>
-          <div class="freelancer-details">
-            <h3>John Doe</h3>
-            <p>UI/UX Designer & Developer</p>
-            <p><strong>Email:</strong> john.doe@example.com</p>
-          </div>
-        </div>
-
+<% layout("/layouts/boilerPlate") %>
+<main class="container">
+  <div class="card">
+    <div class="card-header">Workly Payment</div>
+    <div class="card-body">
+      <% if (checkpoints.length > 0) { %>
         <div class="project-details">
           <h4>Project Information</h4>
-          <p><strong>Project Title:</strong> E-commerce Website Redesign</p>
-          <p><strong>Project ID:</strong> PRJ-2025-0142</p>
-          <p><strong>Started:</strong> February 15, 2025</p>
-          <p><strong>Deadline:</strong> April 30, 2025</p>
-          <p>
-            <span class="tag tag-design">Design</span>
-            <span class="tag tag-development">Development</span>
-          </p>
+          <p><strong>Project Title:</strong> <%= checkpoints[0].jobId.title %></p>
+          <p><strong>Project ID:</strong> <%= checkpoints[0].jobId._id %></p>
+          <p><strong>Started:</strong> <%= checkpoints[0].jobId.createdAt.toLocaleDateString() %></p>
+          <p><strong>Deadline:</strong> <%= checkpoints[0].jobId.deadline.toLocaleDateString() %></p>
         </div>
 
         <div class="checkpoint-list">
           <h4>Payment Checkpoints</h4>
-          
-          <div class="checkpoint-item">
-            <div class="checkpoint-info">
-              <div class="checkpoint-title">Initial Wireframes</div>
-              <div class="checkpoint-date">Completed on: March 1, 2025</div>
-              <div class="checkpoint-status status-paid">Paid</div>
+          <% checkpoints.forEach(checkpoint => { %>
+            <div class="checkpoint-item <%= checkpoint.status === 'completed' ? 'active-checkpoint' : '' %>">
+              <div class="checkpoint-info">
+                <div class="checkpoint-title"><%= checkpoint.name %></div>
+                <div class="checkpoint-date">
+                  <% if (checkpoint.status === 'completed') { %>
+                    Completed on: <%= checkpoint.updatedAt.toLocaleDateString() %>
+                  <% } else { %>
+                    Due on: <%= checkpoint.jobId.deadline.toLocaleDateString() %>
+                  <% } %>
+                </div>
+                <div class="checkpoint-status status-<%= checkpoint.status %>">
+                  <%= checkpoint.status.charAt(0).toUpperCase() + checkpoint.status.slice(1) %>
+                </div>
+                <div class="checkpoint-summary">
+                  <p><%= checkpoint.summary %></p>
+                </div>
+              </div>
+              <div class="checkpoint-amount">$<%= checkpoint.price.toFixed(2) %></div>
+              <% if (checkpoint.status === 'completed') { %>
+                <button class="btn btn-pay" onclick="openPaymentModal()">Pay Now</button>
+              <% } else { %>
+                <button class="btn btn-disabled" disabled>Pay</button>
+              <% } %>
             </div>
-            <div class="checkpoint-amount">$800</div>
-            <button class="btn btn-disabled">Paid</button>
-          </div>
-
-          <div class="checkpoint-item active-checkpoint">
-            <div class="checkpoint-info">
-              <div class="checkpoint-title">UI Designs (Desktop & Mobile)</div>
-              <div class="checkpoint-date">Completed on: March 18, 2025</div>
-              <div class="checkpoint-status status-completed">Completed</div>
-            </div>
-            <div class="checkpoint-amount">$1,200</div>
-            <button class="btn btn-pay" onclick="openPaymentModal()">Pay Now</button>
-          </div>
-
-          <div class="checkpoint-item">
-            <div class="checkpoint-info">
-              <div class="checkpoint-title">Frontend Implementation</div>
-              <div class="checkpoint-date">Due on: April 10, 2025</div>
-              <div class="checkpoint-status status-pending">In Progress</div>
-            </div>
-            <div class="checkpoint-amount">$1,500</div>
-            <button class="btn btn-disabled">Pay</button>
-          </div>
-
-          <div class="checkpoint-item">
-            <div class="checkpoint-info">
-              <div class="checkpoint-title">Backend Integration</div>
-              <div class="checkpoint-date">Due on: April 25, 2025</div>
-              <div class="checkpoint-status status-pending">Pending</div>
-            </div>
-            <div class="checkpoint-amount">$1,000</div>
-            <button class="btn btn-disabled">Pay</button>
-          </div>
+          <% }) %>
         </div>
 
         <div class="payment-summary">
           <div>
             <div class="payment-total">Total Project Value</div>
-            <div class="payment-amount">$4,500</div>
+            <div class="payment-amount">$<%= checkpoints.reduce((sum, cp) => sum + cp.price, 0).toFixed(2) %></div>
           </div>
           <div>
             <div class="payment-total">Paid to Date</div>
-            <div class="payment-amount">$800</div>
+            <div class="payment-amount">$0.00</div> <!-- Update when payment tracking is implemented -->
           </div>
           <div>
             <div class="payment-total">Remaining Balance</div>
-            <div class="payment-amount">$3,700</div>
+            <div class="payment-amount">$<%= checkpoints.reduce((sum, cp) => sum + cp.price, 0).toFixed(2) %></div>
           </div>
         </div>
-      </div>
-    </div>
-  </main>
-
-  <!-- Payment Modal -->
-  <div class="modal" id="paymentModal">
-    <div class="modal-content">
-      <div class="modal-header">
-        Process Payment
-      </div>
-      <div class="modal-body">
-        <div class="form-group">
-          <label>Freelancer</label>
-          <input type="text" class="form-control" value="John Doe" readonly>
-        </div>
-        <div class="form-group">
-          <label>Checkpoint</label>
-          <input type="text" class="form-control" value="UI Designs (Desktop & Mobile)" readonly>
-        </div>
-        <div class="form-group">
-          <label>Amount</label>
-          <input type="text" class="form-control" value="$1,200.00" readonly>
-        </div>
-        <div class="form-group">
-          <label>Payment Method</label>
-          <select class="form-control">
-            <option>Bank Transfer</option>
-            <option>PayPal</option>
-            <option>Stripe</option>
-            <option>Credit Card</option>
-          </select>
-        </div>
-        <div class="form-group">
-          <label>Notes (Optional)</label>
-          <textarea class="form-control" rows="3" placeholder="Add any payment notes here..."></textarea>
-        </div>
-        <div class="form-group">
-          <label class="switch">
-            <input type="checkbox" checked>
-            <span class="slider"></span>
-          </label>
-          <span>Send payment notification to freelancer</span>
-        </div>
-      </div>
-      <div class="modal-footer">
-        <button class="btn btn-cancel" onclick="closePaymentModal()">Cancel</button>
-        <button class="btn btn-pay">Confirm Payment</button>
-      </div>
+      <% } else { %>
+        <div class="alert alert-info">No checkpoints found for this project.</div>
+      <% } %>
     </div>
   </div>
+</main>
 
-  <script>
-    function openPaymentModal() {
-      document.getElementById('paymentModal').style.display = 'flex';
-    }
-    
-    function closePaymentModal() {
-      document.getElementById('paymentModal').style.display = 'none';
-    }
-    
-    // Close modal when clicking outside
-    window.onclick = function(event) {
-      const modal = document.getElementById('paymentModal');
-      if (event.target == modal) {
-        closePaymentModal();
-      }
-    }
-  </script>
+
+
+<!-- Payment Modal -->
+<div class="modal" id="paymentModal">
+  <div class="modal-content">
+    <div class="modal-header">
+      Process Payment
+    </div>
+    <div class="modal-body">
+      <div class="form-group">
+        <label>Freelancer</label>
+        <input type="text" class="form-control" value="John Doe" readonly>
+      </div>
+      <div class="form-group">
+        <label>Checkpoint</label>
+        <input type="text" class="form-control" value="UI Designs (Desktop & Mobile)" readonly>
+      </div>
+      <div class="form-group">
+        <label>Amount</label>
+        <input type="text" class="form-control" value="$1,200.00" readonly>
+      </div>
+      <div class="form-group">
+        <label>Payment Method</label>
+        <select class="form-control">
+          <option>Bank Transfer</option>
+          <option>PayPal</option>
+          <option>Stripe</option>
+          <option>Credit Card</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label>Notes (Optional)</label>
+        <textarea class="form-control" rows="3" placeholder="Add any payment notes here..."></textarea>
+      </div>
+      <div class="form-group">
+        <label class="switch">
+          <input type="checkbox" checked>
+          <span class="slider"></span>
+        </label>
+        <span>Send payment notification to freelancer</span>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-cancel" onclick="closePaymentModal()">Cancel</button>
+      <button class="btn btn-pay">Confirm Payment</button>
+    </div>
+  </div>
+</div>
+
+<script>
+  function openPaymentModal() {
+    document.getElementById('paymentModal').style.display = 'flex';
+  }
+  
+  function closePaymentModal() {
+    document.getElementById('paymentModal').style.display = 'none';
+  }
+  
+  // Close modal when clicking outside
+  window.onclick = function(event) {
+    const modal = document.getElementById('paymentModal');
+    if (event.target == modal) {
+      closePaymentModal();
+    }
+  }
+</script>

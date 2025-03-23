@@ -1,0 +1,82 @@
+<% layout("/layouts/boilerPlate") %>
+
+<nav class="navbar">
+    <div class="logo">Workly</div>
+    <div class="auth-buttons">
+        <% if (currUser) { %>
+            <form action="/logout" method="post">
+                <button class="btn btn-logout" type="submit">Logout</button>
+            </form>
+            <form action="/postjob" method="get">
+                <button class="btn" type="submit">Post Job</button>
+            </form>
+            <form action="/postedjob/<%= jobs._id %>" method="get">
+                <button class="btn" type="submit">Posted Job</button>
+            </form>
+        <% } else { %>
+            <button class="btn btn-login" onclick="openModal('login')">Login</button>
+            <button class="btn btn-signup" onclick="openModal('signup')">Sign Up</button>
+        <% } %>
+        
+    </div>
+</nav>
+<br><br>
+<div class="recycler-view" id="job-list">
+    <% if(jobs && jobs.length > 0) { %>
+        <% jobs.forEach(job => { %>
+            <div class="job-card">
+                <div class="job-header">
+                    <div class="job-avatar">
+                        <%= job.title.split(' ').map(n => n[0]).join('').slice(0, 2) %>
+                    </div>
+                    <div class="job-meta">
+                        <h3 class="job-title"><%= job.title %></h3>
+                        <div class="job-category"><%= job.category %></div>
+                    </div>
+                </div>
+                
+                <div class="job-details">
+                    <div class="detail-item">
+                        <span class="detail-icon">💰</span>
+                        <span class="detail-value">$<%= job.budget.toLocaleString() %></span>
+                    </div>
+                    <div class="detail-item">
+                        <span class="detail-icon">📅</span>
+                        <span class="detail-value">
+                            <%= job.deadline.toLocaleDateString('en-US', { 
+                                year: 'numeric', 
+                                month: 'short', 
+                                day: 'numeric' 
+                            }) %>
+                        </span>
+                    </div>
+                    <div class="detail-item">
+                        <span class="detail-icon">📌</span>
+                        <span class="detail-value"><%= job.experienceLevel %> Level</span>
+                    </div>
+                </div>
+
+                <div class="job-description">
+                    <p><%= job.description.substring(0, 100) %>...</p>
+                </div>
+               <form action="/payment"><button class="btn">View</button></form> 
+                
+                <br><br>
+                <% if (job.postedBy && job.postedBy.username) { %>
+                    <div class="job-poster">
+                        <span class="posted-by">Posted by: <%= job.postedBy.username %></span>
+                        <span class="post-date">
+                            <%= job.createdAt.toLocaleDateString() %>
+                        </span>
+                    </div>
+                <% } %>
+            </div>
+        <% }); %>
+    <% } else { %>
+        <div class="empty-state">
+            <div class="empty-icon">📭</div>
+            <div class="empty-text">No job postings available</div>
+            <div class="empty-subtext">Check back later or post a new job!</div>
+        </div>
+    <% } %>
+</div>
