@@ -1,7 +1,10 @@
 {
   "dependencies": {
     "@supabase/supabase-js": "^2.49.1",
+    "axios": "^1.8.4",
     "connect-flash": "^0.1.1",
+    "cors": "^2.8.5",
+    "dotenv": "^16.4.7",
     "ejs": "^3.1.10",
     "ejs-mate": "^4.0.0",
     "express": "^4.21.2",
@@ -11,6 +14,7 @@
     "mongoose": "^8.12.1",
     "node": "^20.19.0",
     "nodemon": "^3.1.9",
+    "openai": "^4.89.0",
     "passport": "^0.7.0",
     "passport-local": "^1.0.0",
     "passport-local-mongoose": "^8.0.0",
