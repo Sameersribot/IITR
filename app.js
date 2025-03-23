@@ -3,7 +3,7 @@ const app = express()
 const path = require("path")
 const ejsMate = require("ejs-mate")
 const mongoose = require("mongoose")
-const mongo_url = "mongodb://127.0.0.1:27017/IITR"
+const mongo_url = "mongodb+srv://admin:lGLO2T8SYL57vJFL@cluster0.yj83q.mongodb.net/?retryWrites=true&w=majority&appName=Cluster"
 const flash = require("connect-flash")
 const { isLoggedin } = require("./middleware.js")
 const ExpressError = require("./utils/ExpressError.js")

@@ -44,10 +44,11 @@
         <div style="display: flex; gap: 10px; margin-top: 10px;">
             <input type="url" 
                    id="commit-link" 
+                   name="giturl"
                    placeholder="Paste GitHub commit URL"
                    pattern="https://github.com/.*/commit/[a-f0-9]{40}"
                    title="Enter a valid GitHub commit URL">
-            <button type="button" onclick="addCommitDependency()" class="btn-secondary">Add Commit</button>
+            <button type="button"  class="btn-secondary">Add Commit</button>
         </div>
       </div>
       
@@ -64,7 +65,7 @@
         <button type="button" class="btn-secondary" id="reset-form">Reset</button>
         <div class="loader" id="loader"></div>
         <div class="result" id="result"></div>
-        <button type="submit" class="btn-primary">Add Checkpoint</button>
+        <button type="submit" onclick="analyzeCommit()" class="btn-primary">Add Checkpoint</button>
       </div>
     </form>
   </div>
@@ -119,6 +120,7 @@
 </div>
 
 <script>
+
   document.addEventListener('DOMContentLoaded', function() {
     const form = document.getElementById('checkpoint-form');
     const resetButton = document.getElementById('reset-form');
@@ -151,6 +153,8 @@
     const commitInput = document.getElementById('commit-link');
     const dependenciesList = document.getElementById('dependencies-list');
     const commitUrl = commitInput.value.trim();
+   
+
 
     // Basic GitHub URL validation
     if (!commitUrl.match(/https:\/\/github.com\/.*\/commit\/[a-f0-9]{40}/)) {
@@ -179,10 +183,54 @@
     dependenciesList.appendChild(tag);
     commitInput.value = '';
 }
+
+
   
-  function analyzeCommit() {
-    // Your existing analyzeCommit implementation
+function analyzeCommit() {
+  const commitLink = document.getElementById('commit-link').value;
+  const loader = document.getElementById('loader');
+  const resultDiv = document.getElementById('result');
+
+  const nameofid = document.getElementById('name').value.toString();
+  console.log(nameofid);
+
+  if (!commitLink) {
+      resultDiv.textContent = 'Please enter a GitHub commit URL.';
+      resultDiv.style.color = 'red';
+      return;
   }
+
+  // Show loader
+  loader.style.display = 'block';
+  resultDiv.textContent = '';
+  
+  // Send to webhook
+  fetch('https://hook.eu2.make.com/yjhg9dq9rprek4oyqod6fodc6fokdide', {
+      method: 'POST',
+      headers: {
+          'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ 
+          githubUrl: commitLink, 
+          
+      }),
+  })
+  .then(response => {
+      loader.style.display = 'none';
+      if (response.ok) {
+          resultDiv.textContent = 'Commit analysis started successfully!';
+          resultDiv.style.color = 'green';
+      } else {
+          resultDiv.textContent = 'Error sending data';
+          resultDiv.style.color = 'red';
+      }
+  })
+  .catch(error => {
+      loader.style.display = 'none';
+      resultDiv.textContent = 'Error: ' + error.message;
+      resultDiv.style.color = 'red';
+  });
+}
   // Edit Functionality
 document.querySelectorAll('.checkpoint-actions .btn-secondary').forEach(editBtn => {
     editBtn.addEventListener('click', async function() {
@@ -309,3 +357,6 @@ function addCommitDependencyToUI(url) {
     dependenciesList.appendChild(tag);
 }
 </script>
+
+
+ 

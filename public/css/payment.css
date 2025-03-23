@@ -1,370 +1,381 @@
 :root {
-    --primary-green: #2ecc71;
-    --dark-green: #27ae60;
-    --light-green: #a3f7bf;
-    --black: #1a1a1a;
-    --dark-gray: #333;
-    --light-gray: #f5f5f5;
-    --white: #ffffff;
-  }
-  
-  * {
-    margin: 0;
-    padding: 0;
-    box-sizing: border-box;
-    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-  }
-  
-  body {
-    background-color: var(--light-gray);
-    color: var(--black);
-  }
-  
-  .container {
-    max-width: 1200px;
-    margin: 0 auto;
-    padding: 20px;
-  }
-  
-  header {
-    background-color: var(--black);
-    padding: 15px 0;
-    color: var(--white);
-  }
-  
-  .header-content {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-  }
-  
-  .logo {
-    font-size: 24px;
-    font-weight: bold;
-    color: var(--primary-green);
-  }
-  
-  .user-info {
-    display: flex;
-    align-items: center;
-    gap: 15px;
-  }
-  
-  .user-avatar {
-    width: 40px;
-    height: 40px;
-    border-radius: 50%;
-    background-color: var(--primary-green);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    color: var(--white);
-    font-weight: bold;
-  }
-  
-  main {
-    margin-top: 30px;
-  }
-  
-  .card {
-    background-color: var(--white);
-    border-radius: 8px;
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-    margin-bottom: 25px;
-    overflow: hidden;
-  }
-  
-  .card-header {
-    background-color: var(--black);
-    color: var(--white);
-    padding: 15px 20px;
-    font-size: 18px;
-    font-weight: bold;
-    border-bottom: 3px solid var(--primary-green);
-  }
-  
-  .card-body {
-    padding: 20px;
-  }
-  
-  .freelancer-info {
-    display: flex;
-    align-items: center;
-    margin-bottom: 25px;
-  }
-  
-  .freelancer-avatar {
-    width: 60px;
-    height: 60px;
-    border-radius: 50%;
-    background-color: var(--light-green);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    color: var(--black);
-    font-size: 24px;
-    font-weight: bold;
-    margin-right: 15px;
-  }
-  
-  .freelancer-details h3 {
-    margin-bottom: 5px;
-    color: var(--black);
-  }
-  
-  .freelancer-details p {
-    color: var(--dark-gray);
-    font-size: 14px;
-  }
-  
-  .project-details {
-    background-color: var(--light-gray);
-    padding: 15px;
-    border-radius: 6px;
-    margin-bottom: 20px;
-  }
-  
-  .project-details h4 {
-    color: var(--black);
-    margin-bottom: 10px;
-    border-bottom: 1px solid var(--dark-gray);
-    padding-bottom: 5px;
-  }
-  
-  .checkpoint-list {
-    margin-top: 25px;
-  }
-  
-  .checkpoint-item {
-    border: 1px solid #ddd;
-    border-radius: 6px;
-    padding: 15px;
-    margin-bottom: 15px;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-  }
-  
-  .checkpoint-info {
-    flex: 1;
-  }
-  
-  .checkpoint-title {
-    font-weight: bold;
-    margin-bottom: 5px;
-  }
-  
-  .checkpoint-date {
-    color: var(--dark-gray);
-    font-size: 13px;
-  }
-  
-  .checkpoint-amount {
-    font-weight: bold;
-    font-size: 18px;
-    color: var(--dark-green);
-  }
-  
-  .checkpoint-status {
-    display: inline-block;
-    padding: 5px 10px;
-    border-radius: 4px;
-    font-size: 12px;
-    font-weight: bold;
-    margin-top: 5px;
-  }
-  
-  .status-completed {
-    background-color: var(--light-green);
-    color: var(--dark-green);
-  }
-  
-  .status-pending {
-    background-color: #ffeaa7;
-    color: #fdcb6e;
-  }
-  
-  .status-paid {
-    background-color: #dfe6e9;
-    color: #636e72;
-  }
-  
-  .btn {
-    padding: 10px 15px;
-    border: none;
-    border-radius: 4px;
-    cursor: pointer;
-    font-weight: bold;
-    transition: all 0.3s ease;
-  }
-  
-  .btn-pay {
-    background-color: var(--primary-green);
-    color: var(--white);
-  }
-  
-  .btn-pay:hover {
-    background-color: var(--dark-green);
-  }
-  
-  .btn-disabled {
-    background-color: var(--light-gray);
-    color: var(--dark-gray);
-    cursor: not-allowed;
-  }
-  
-  .payment-summary {
-    display: flex;
-    justify-content: space-between;
-    margin-top: 30px;
-    padding-top: 20px;
-    border-top: 1px solid #ddd;
-  }
-  
-  .payment-total {
-    font-size: 18px;
-    font-weight: bold;
-  }
-  
-  .payment-amount {
-    font-size: 24px;
-    color: var(--dark-green);
-    font-weight: bold;
-  }
-  
-  .payment-actions {
-    display: flex;
-    gap: 10px;
-  }
-  
-  .modal {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background-color: rgba(0, 0, 0, 0.5);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    z-index: 1000;
-    display: none;
-  }
-  
-  .modal-content {
-    background-color: var(--white);
-    border-radius: 8px;
-    width: 400px;
-    overflow: hidden;
-  }
-  
-  .modal-header {
-    background-color: var(--black);
-    color: var(--white);
-    padding: 15px 20px;
-    font-size: 18px;
-    font-weight: bold;
-    border-bottom: 3px solid var(--primary-green);
-  }
-  
-  .modal-body {
-    padding: 20px;
-  }
-  
-  .form-group {
-    margin-bottom: 15px;
-  }
-  
-  .form-group label {
-    display: block;
-    margin-bottom: 5px;
-    font-weight: bold;
-  }
-  
-  .form-control {
-    width: 100%;
-    padding: 10px;
-    border: 1px solid #ddd;
-    border-radius: 4px;
-  }
-  
-  .modal-footer {
-    display: flex;
-    justify-content: flex-end;
-    padding: 15px 20px;
-    background-color: var(--light-gray);
-    gap: 10px;
-  }
-  
-  .btn-cancel {
-    background-color: var(--dark-gray);
-    color: var(--white);
-  }
-  
-  .tag {
-    display: inline-block;
-    padding: 3px 8px;
-    border-radius: 4px;
-    font-size: 12px;
-    margin-right: 5px;
-  }
-  
-  .tag-design {
-    background-color: #e84393;
-    color: white;
-  }
-  
-  .tag-development {
-    background-color: #0984e3;
-    color: white;
-  }
-  
-  .active-checkpoint {
-    border-left: 3px solid var(--primary-green);
-  }
-  
-  /* Custom toggle switch */
-  .switch {
-    position: relative;
-    display: inline-block;
-    width: 50px;
-    height: 24px;
-  }
-  
-  .switch input {
-    opacity: 0;
-    width: 0;
-    height: 0;
-  }
-  
-  .slider {
-    position: absolute;
-    cursor: pointer;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background-color: #ccc;
-    transition: .4s;
-    border-radius: 24px;
-  }
-  
-  .slider:before {
-    position: absolute;
-    content: "";
-    height: 16px;
-    width: 16px;
-    left: 4px;
-    bottom: 4px;
-    background-color: white;
-    transition: .4s;
-    border-radius: 50%;
-  }
-  
-  input:checked + .slider {
-    background-color: var(--primary-green);
-  }
-  
-  input:checked + .slider:before {
-    transform: translateX(26px);
-  }
+  --primary-green: #2ecc71;
+  --dark-green: #27ae60;
+  --light-green: #a3f7bf;
+  --black: #1a1a1a;
+  --dark-gray: #333;
+  --light-gray: #f5f5f5;
+  --white: #ffffff;
+}
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+body {
+  background-color: var(--light-gray);
+  color: var(--black);
+}
+
+.container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 20px;
+}
+
+header {
+  background-color: var(--black);
+  padding: 15px 0;
+  color: var(--white);
+}
+
+.header-content {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.logo {
+  font-size: 24px;
+  font-weight: bold;
+  color: var(--primary-green);
+}
+
+.user-info {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+}
+
+.user-avatar {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background-color: var(--primary-green);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--white);
+  font-weight: bold;
+}
+
+main {
+  margin-top: 30px;
+}
+
+.card {
+  background-color: var(--white);
+  border-radius: 8px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  margin-bottom: 25px;
+  overflow: hidden;
+}
+
+.card-header {
+  background-color: var(--black);
+  color: var(--white);
+  padding: 15px 20px;
+  font-size: 18px;
+  font-weight: bold;
+  border-bottom: 3px solid var(--primary-green);
+}
+
+.card-body {
+  padding: 20px;
+}
+
+.freelancer-info {
+  display: flex;
+  align-items: center;
+  margin-bottom: 25px;
+}
+
+.freelancer-avatar {
+  width: 60px;
+  height: 60px;
+  border-radius: 50%;
+  background-color: var(--light-green);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--black);
+  font-size: 24px;
+  font-weight: bold;
+  margin-right: 15px;
+}
+
+.freelancer-details h3 {
+  margin-bottom: 5px;
+  color: var(--black);
+}
+
+.freelancer-details p {
+  color: var(--dark-gray);
+  font-size: 14px;
+}
+
+.project-details {
+  background-color: var(--light-gray);
+  padding: 15px;
+  border-radius: 6px;
+  margin-bottom: 20px;
+}
+
+.project-details h4 {
+  color: var(--black);
+  margin-bottom: 10px;
+  border-bottom: 1px solid var(--dark-gray);
+  padding-bottom: 5px;
+}
+
+.checkpoint-list {
+  margin-top: 25px;
+}
+
+.checkpoint-item {
+  border: 1px solid #ddd;
+  border-radius: 6px;
+  padding: 15px;
+  margin-bottom: 15px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.checkpoint-info {
+  flex: 1;
+}
+
+.checkpoint-title {
+  font-weight: bold;
+  margin-bottom: 5px;
+}
+
+.checkpoint-date {
+  color: var(--dark-gray);
+  font-size: 13px;
+}
+
+.checkpoint-amount {
+  font-weight: bold;
+  font-size: 18px;
+  color: var(--dark-green);
+}
+
+.checkpoint-status {
+  display: inline-block;
+  padding: 5px 10px;
+  border-radius: 4px;
+  font-size: 12px;
+  font-weight: bold;
+  margin-top: 5px;
+}
+
+.status-completed {
+  background-color: var(--light-green);
+  color: var(--dark-green);
+}
+
+.status-pending {
+  background-color: #ffeaa7;
+  color: #fdcb6e;
+}
+
+.status-paid {
+  background-color: #dfe6e9;
+  color: #636e72;
+}
+
+.btn {
+  padding: 10px 15px;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-weight: bold;
+  transition: all 0.3s ease;
+}
+
+.btn-pay {
+  background-color: var(--primary-green);
+  color: var(--white);
+}
+
+.btn-pay:hover {
+  background-color: var(--dark-green);
+}
+
+.btn-disabled {
+  background-color: var(--light-gray);
+  color: var(--dark-gray);
+  cursor: not-allowed;
+}
+
+.payment-summary {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 30px;
+  padding-top: 20px;
+  border-top: 1px solid #ddd;
+  gap: 20px;
+}
+
+.payment-summary > div {
+  flex: 1;
+  text-align: center;
+  padding: 10px;
+  background: var(--light-gray);
+  border-radius: 6px;
+}
+
+.payment-total {
+  font-size: 18px;
+  font-weight: bold;
+}
+
+.payment-amount {
+  font-size: 24px;
+  color: var(--dark-green);
+  font-weight: bold;
+}
+
+.modal {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  display: none;
+}
+
+.modal-content {
+  background-color: var(--white);
+  border-radius: 8px;
+  width: 400px;
+  overflow: hidden;
+}
+
+.modal-header {
+  background-color: var(--black);
+  color: var(--white);
+  padding: 15px 20px;
+  font-size: 18px;
+  font-weight: bold;
+  border-bottom: 3px solid var(--primary-green);
+}
+
+.modal-body {
+  padding: 20px;
+}
+
+.form-group {
+  margin-bottom: 1.5rem;
+}
+
+.form-group label {
+  display: block;
+  margin-bottom: 5px;
+  font-weight: bold;
+}
+
+.form-control {
+  width: 100%;
+  padding: 10px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+}
+
+.modal-footer {
+  display: flex;
+  justify-content: flex-end;
+  padding: 15px 20px;
+  background-color: var(--light-gray);
+  gap: 10px;
+}
+
+.btn-cancel {
+  background-color: var(--dark-gray);
+  color: var(--white);
+}
+
+.tag {
+  display: inline-block;
+  padding: 3px 8px;
+  border-radius: 4px;
+  font-size: 12px;
+  margin-right: 5px;
+}
+
+.tag-design {
+  background-color: #e84393;
+  color: white;
+}
+
+.tag-development {
+  background-color: #0984e3;
+  color: white;
+}
+
+.active-checkpoint {
+  border-left: 5px solid var(--primary-green);
+  margin-left: -2px;
+  border-radius: 6px 6px 6px 3px;
+}
+
+.switch {
+  position: relative;
+  display: inline-block;
+  width: 50px;
+  height: 24px;
+}
+
+.switch input {
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+
+.slider {
+  position: absolute;
+  cursor: pointer;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: #ccc;
+  transition: 0.4s;
+  border-radius: 24px;
+}
+
+.slider:before {
+  position: absolute;
+  content: "";
+  height: 16px;
+  width: 16px;
+  left: 4px;
+  bottom: 4px;
+  background-color: white;
+  transition: 0.4s;
+  border-radius: 50%;
+}
+
+input:checked + .slider {
+  background-color: var(--primary-green);
+}
+
+input:checked + .slider:before {
+  transform: translateX(26px);
+}
+
+.form-group.switch-group {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}

@@ -11,9 +11,9 @@ const checkpointSchema = new mongoose.Schema({
         required: [true, 'Checkpoint type is required'],
         enum: ['start', 'milestone', 'verification', 'approval', 'completion']
     },
-    description: {
+    giturl: {
         type: String,
-        trim: true
+        required: [true, 'Checkpoint type is required'],
     },
     dependencies: [{
         type: mongoose.Schema.Types.ObjectId,
@@ -42,6 +42,9 @@ const checkpointSchema = new mongoose.Schema({
         type: String,
         default: 'pending',
         enum: ['pending', 'in-progress', 'completed']
+    },
+    summary: {
+        type:String,
     }
 }, { timestamps: true });
 
