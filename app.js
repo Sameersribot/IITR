@@ -51,25 +51,19 @@ store.on("err",()=>{
 
 const sessionOptions = {
   store,
-  name: 'workly.sid',
+  
   secret: "mysupersecretcode",
   resave: false,
   saveUninitialized: false, 
-  cookie: {
-    httpOnly: true,
-    secure: process.env.NODE_ENV === 'production',
-    maxAge: 1000 * 60 * 60 * 24 * 7,
-    sameSite: 'lax'
-  }
+  
 };
 
 app.use(session(sessionOptions))
+
+
 app.use(passport.initialize())
 app.use(passport.session())
 app.use(flash())
-
-
-
 
 passport.use(new localStrategy(User.authenticate()))
 passport.serializeUser(User.serializeUser());
@@ -303,41 +297,25 @@ app.post("/submitcheckpoints", wrapAsync(async (req, res) => {
     req.flash('success', 'Checkpoint created successfully!');
     res.redirect(`/checkpoint/${jobId}`);
 }));
-app.post("/login", (req, res, next) => {
-  passport.authenticate("local", (err, user, info) => {
-    if (err) return next(err);
-    if (!user) {
-      req.flash("error", info.message || "Invalid credentials");
-      return res.redirect("/");
-    }
-    req.logIn(user, (err) => {
-      if (err) return next(err);
-      req.flash("success", `Welcome back, ${user.username}!`);
-      return res.redirect("/");
-    });
-  })(req, res, next);
-});
+app.post("/login", passport.authenticate("local", { 
+  failureRedirect: '/',
+  successRedirect: '/',
+  failureFlash: 'Invalid credentials', 
+  successFlash: 'Welcome to workly!'   
+}));
 
 app.post("/logout", (req, res, next) => {
-  req.logOut((err) => {
-    if (err) return next(err);
-    req.flash("success", "Logout successful"); 
-    res.redirect("/");
-  });
-});
-app.get('/session-debug', (req, res) => {
-  // Get raw session from store
-  store.get(req.sessionID, (err, session) => {
-    res.json({
-      sessionID: req.sessionID,
-      sessionFromStore: session,
-      sessionFromReq: req.session,
-      flashContents: req.flash(),
-      user: req.user
-    });
-  });
-});
- 
+    req.logOut((err) => {
+        if (err) {
+            return next(err)
+        }
+        req.flash("success", "Logout sucessfull")
+        res.redirect("/")
+    })
+})
+
+
+
 app.all("*", (req, res, next) => {
     next(new ExpressError(404, "page not found"))
 })
