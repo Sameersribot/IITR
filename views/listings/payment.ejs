@@ -1,132 +1,171 @@
 <% layout("/layouts/boilerplate") %>
 
-<main class="container">
-  <div class="card">
-    <div class="card-header">Workly Payment</div>
-    <div class="card-body">
-      <% if (checkpoints.length > 0) { %>
-        <div class="project-details">
-          <h4>Project Information</h4>
-          <p><strong>Project Title:</strong> <%= checkpoints[0].jobId.title %></p>
-          <p><strong>Project ID:</strong> <%= checkpoints[0].jobId._id %></p>
-          <p><strong>Started:</strong> <%= checkpoints[0].jobId.createdAt.toLocaleDateString() %></p>
-          <p><strong>Deadline:</strong> <%= checkpoints[0].jobId.deadline.toLocaleDateString() %></p>
-        </div>
-
-        <div class="checkpoint-list">
-          <h4>Payment Checkpoints</h4>
-          <% checkpoints.forEach(checkpoint => { %>
-            <div class="checkpoint-item <%= checkpoint.status === 'completed' ? 'active-checkpoint' : '' %>">
-              <div class="checkpoint-info">
-                <div class="checkpoint-title"><%= checkpoint.name %></div>
-                <div class="checkpoint-date">
-                  <% if (checkpoint.status === 'completed') { %>
-                    Completed on: <%= checkpoint.updatedAt.toLocaleDateString() %>
-                  <% } else { %>
-                    Due on: <%= checkpoint.jobId.deadline.toLocaleDateString() %>
-                  <% } %>
+<body class="body123">
+    <div class="container123">
+        <div class="payment-card123">
+            <div class="card-header123">
+                <div class="card-header-title123">
+                    <h3 class="fas fa-credit-card" style="color: green;"> Workly Payment Dashboard</h3> </i>
                 </div>
-                <div class="checkpoint-status status-<%= checkpoint.status %>">
-                  <%= checkpoint.status.charAt(0).toUpperCase() + checkpoint.status.slice(1) %>
+                <div class="project-id123">
+                    Project ID: <%= checkpoints && checkpoints.length > 0 ? checkpoints[0].jobId._id : 'N/A' %>
                 </div>
-                <div class="checkpoint-summary">
-                  <p><%= checkpoint.summary %></p>
-                </div>
-              </div>
-              <div class="checkpoint-amount">$<%= checkpoint.price.toFixed(2) %></div>
-              <% if (checkpoint.status === 'completed') { %>
-                <button class="btn btn-pay" onclick="openPaymentModal()">Pay Now</button>
-              <% } else { %>
-                <button class="btn btn-disabled" disabled>Pay</button>
-              <% } %>
             </div>
-          <% }) %>
+            <div class="card-body123">
+                <!-- Project Information -->
+                <div class="project-info123">
+                    <h4><i class="fas fa-project-diagram"></i> Project Information</h4>
+                    <% if (checkpoints && checkpoints.length > 0) { %>
+                        <div class="info-grid123">
+                            <div class="info-item123">
+                                <strong>Project Title:</strong>
+                                <div><%= checkpoints[0].jobId.title %></div>
+                            </div>
+                            <div class="info-item123">
+                                <strong>Project ID:</strong>
+                                <div><%= checkpoints[0].jobId._id %></div>
+                            </div>
+                            <div class="info-item123">
+                                <strong>Started:</strong>
+                                <div><%= new Date(checkpoints[0].jobId.createdAt).toLocaleDateString() %></div>
+                            </div>
+                            <div class="info-item123">
+                                <strong>Deadline:</strong>
+                                <div><%= new Date(checkpoints[0].jobId.deadline).toLocaleDateString() %></div>
+                            </div>
+                        </div>
+                    <% } %>
+                </div>
+
+                <!-- Payment Items Section -->
+                <div class="payment-items123">
+                    <h4><i class="fas fa-tasks"></i> Payment Items</h4>
+                    
+                    <% if (checkpoints && checkpoints.length > 0) { 
+                        let totalAmount = 0;
+                        let paidAmount = 0;
+                    %>
+                        <% checkpoints.forEach(item => { %>
+                            <% totalAmount += item.price; %>
+                            
+                            <div class="payment-item123">
+                                <div class="payment-content123">
+                                    <div class="payment-title123">
+                                        <i class="fas fa-flag-checkered"></i> <%= item.name %>
+                                    </div>
+                                    <div class="payment-date123">
+                                        <i class="fas fa-calendar"></i>
+                                        <% if (item.status === 'paid' || item.status === 'completed') { %>
+                                            Updated on: <%= new Date(item.updatedAt).toLocaleDateString() %>
+                                        <% } else { %>
+                                            Due on: <%= new Date(item.jobId.deadline).toLocaleDateString() %>
+                                        <% } %>
+                                    </div>
+                                    <div class="payment-details123">
+                                        <p><strong>Type:</strong> <%= item.type %></p>
+                                        <p><%= item.description %></p>
+                                        <p><%= item.summary %></p>
+                                        <% if (item.commitDependencies && item.commitDependencies.length > 0) { %>
+                                            <p><strong>GitHub Commits:</strong>
+                                                <% item.commitDependencies.forEach(url => { %>
+                                                    <a href="<%= url %>" target="_blank" class="commit-link123">
+                                                        <%= url.split('/').pop().substring(0, 7) %>
+                                                    </a>
+                                                <% }); %>
+                                            </p>
+                                        <% } %>
+                                    </div>
+                                </div>
+                                <div class="payment-amount123">
+                                    $<%= item.price.toFixed(2) %>
+                                </div>
+                                <button class="btn123 btn-pay123" 
+                                        onclick="processPayment123(this, 
+                                            '<%= item._id %>', 
+                                            '<%= item.price %>', 
+                                            '<%= item.name %>')">
+                                    <i class="fas fa-money-bill-wave" style="color: black;">Pay Now</i> 
+                                </button>
+                            </div>
+                        <% }); %>
+
+                        
+                    <% } else { %>
+                        <div class="no-payments123">
+                            <h4><i class="fas fa-info-circle"></i> No Payment Items Found</h4>
+                            <p>This project doesn't have any payment items yet.</p>
+                            <p>Please create payment items in the project management view.</p>
+                            <a href="/" class="btn-primary123">
+                                <i class="fas fa-arrow-left"></i> Return to Projects
+                            </a>
+                        </div>
+                    <% } %>
+                </div>
+            </div>
         </div>
+    </div>
 
-        <div class="payment-summary">
-          <div>
-            <div class="payment-total">Total Project Value</div>
-            <div class="payment-amount">$<%= checkpoints.reduce((sum, cp) => sum + cp.price, 0).toFixed(2) %></div>
-          </div>
-          <div>
-            <div class="payment-total">Paid to Date</div>
-            <div class="payment-amount">$0.00</div> <!-- Update when payment tracking is implemented -->
-          </div>
-          <div>
-            <div class="payment-total">Remaining Balance</div>
-            <div class="payment-amount">$<%= checkpoints.reduce((sum, cp) => sum + cp.price, 0).toFixed(2) %></div>
-          </div>
+    <!-- Payment success overlay -->
+    <div class="overlay123" id="overlay123"></div>
+    
+    <!-- Payment success message -->
+    <div class="payment-success123" id="paymentSuccess123">
+        <div class="success-icon123">
+            <i class="fas fa-check-circle"></i>
         </div>
-      <% } else { %>
-        <div class="alert alert-info">No checkpoints found for this project.</div>
-      <% } %>
+        <div class="success-message123">Payment Successful!</div>
+        <div class="success-details123">
+            Your payment of <strong id="paidAmount123">$0.00</strong> for <strong id="paidItem123">Item Name</strong> has been processed successfully.
+        </div>
+        <button class="btn-close123" onclick="closeSuccess123()">Continue</button>
     </div>
-  </div>
-</main>
 
-
-
-<!-- Payment Modal -->
-<div class="modal" id="paymentModal">
-  <div class="modal-content">
-    <div class="modal-header">
-      Process Payment
-    </div>
-    <div class="modal-body">
-      <div class="form-group">
-        <label>Freelancer</label>
-        <input type="text" class="form-control" value="John Doe" readonly>
-      </div>
-      <div class="form-group">
-        <label>Checkpoint</label>
-        <input type="text" class="form-control" value="UI Designs (Desktop & Mobile)" readonly>
-      </div>
-      <div class="form-group">
-        <label>Amount</label>
-        <input type="text" class="form-control" value="$1,200.00" readonly>
-      </div>
-      <div class="form-group">
-        <label>Payment Method</label>
-        <select class="form-control">
-          <option>Bank Transfer</option>
-          <option>PayPal</option>
-          <option>Stripe</option>
-          <option>Credit Card</option>
-        </select>
-      </div>
-      <div class="form-group">
-        <label>Notes (Optional)</label>
-        <textarea class="form-control" rows="3" placeholder="Add any payment notes here..."></textarea>
-      </div>
-      <div class="form-group">
-        <label class="switch">
-          <input type="checkbox" checked>
-          <span class="slider"></span>
-        </label>
-        <span>Send payment notification to freelancer</span>
-      </div>
-    </div>
-    <div class="modal-footer">
-      <button class="btn btn-cancel" onclick="closePaymentModal()">Cancel</button>
-      <button class="btn btn-pay">Confirm Payment</button>
-    </div>
-  </div>
-</div>
-
-<script>
-  function openPaymentModal() {
-    document.getElementById('paymentModal').style.display = 'flex';
-  }
-  
-  function closePaymentModal() {
-    document.getElementById('paymentModal').style.display = 'none';
-  }
-  
-  // Close modal when clicking outside
-  window.onclick = function(event) {
-    const modal = document.getElementById('paymentModal');
-    if (event.target == modal) {
-      closePaymentModal();
-    }
-  }
-</script>
+    <script>
+        // Initialize payment variables
+        let paidTotal123 = 0;
+        
+        function processPayment123(button, itemId, amount, itemName) {
+            // Show processing state
+            const originalHTML = button.innerHTML;
+            button.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Processing...';
+            button.classList.remove('btn-pay123');
+            button.classList.add('btn-processing123');
+            button.disabled = true;
+            
+            // Simulate payment processing (3 seconds)
+            setTimeout(() => {
+                // Change to paid status
+                button.innerHTML = '<i class="fas fa-check"></i> Paid';
+                button.classList.remove('btn-processing123');
+                button.classList.add('btn-paid123');
+                button.onclick = null;
+                
+                // Show success message
+                document.getElementById('paidAmount123').textContent = '$' + amount.toFixed(2);
+                document.getElementById('paidItem123').textContent = itemName;
+                document.getElementById('paymentSuccess123').style.display = 'block';
+                document.getElementById('overlay123').style.display = 'block';
+                
+                // Update payment summary
+                updatePaymentSummary123(amount);
+                
+            }, 3000);
+        }
+        
+        function closeSuccess123() {
+            document.getElementById('paymentSuccess123').style.display = 'none';
+            document.getElementById('overlay123').style.display = 'none';
+        }
+        
+        function updatePaymentSummary123(amount) {
+            // Update paid total
+            paidTotal123 += amount;
+            
+            // Get total amount
+            const totalAmount = parseFloat(document.getElementById('payment-total123').textContent.replace('$', ''));
+            
+            // Update UI elements
+            document.getElementById('payment-paid123').textContent = '$' + paidTotal123.toFixed(2);
+            document.getElementById('payment-balance123').textContent = '$' + (totalAmount - paidTotal123).toFixed(2);
+        }
+    </script>

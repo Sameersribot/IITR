@@ -4,7 +4,7 @@
     <div class="jd-header">
       <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
         <h1><%= job.title %></h1>
-        <button class="jd-btn-outline" style="width: 7vw; height: 7vh;"   onclick="window.history.back()">Back to Jobs</button>
+        <button class="jd-btn-outline" style="width: 7vw; height: 9vh;"   onclick="window.history.back()">Back to Jobs</button>
       </div>
       <div class="jd-meta">
         <div class="jd-meta-item">
@@ -115,9 +115,19 @@
             </div>
           </div>
         </div>
-        <div class="jd-action-bar">
-            <form action="/checkpoint/<%= job._id%>" method="get"> <button class="jd-btn-primary"style="width: 10vw; height: 7vh; border:none" >Apply</button></form>
-        </div>
+          
+          <% if (currUser && currUser._id.toString() === job.postedBy._id.toString()) { %>
+           <form action="/payment/<%=job._id%>" method="get">
+           <button class="jd-btn-primary">View Applications</button>
+           </form>
+          <% } else { %>
+          <form action="/checkpoint/<%= job._id%>" method="get"> 
+          <button class="jd-btn-primary">Apply</button>
+          </form>
+          <% } %>
+        
+        
+        
       <% } %>
       
       

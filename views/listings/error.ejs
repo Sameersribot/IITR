@@ -1,7 +1,17 @@
-<% layout("/layouts/boilerplate") %>
-<div class="main">
+
+
+
+<%  if(error && error.length){  %>
 <div class="alert">
-    <%= message %> 
+    <%= error %> 
     <button class="close-btn" onclick="this.parentElement.style.display='none'">&times;</button>
 </div>
-</div>
+<%  }  %>
+
+<%  if(success && success.length){  %>
+    <div class="alert-success">
+        <%= success %> 
+        <button class="close-btn" onclick="this.parentElement.style.display='none'">&times;</button>
+    </div>
+    <%  }  %>
+

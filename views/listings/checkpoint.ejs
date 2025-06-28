@@ -2,7 +2,7 @@
 
 <div class="container">
   <header>
-    <h1>Job Checkpoint Creation</h1>
+    <h1 style="color: black; margin-left: 4%;">Job Checkpoint Creation</h1>
     <div id="job-info">
       <strong>Job ID:</strong> <span id="job-id"><%= job._id %></span>
     </div>
@@ -107,15 +107,13 @@
         <% } %>
     </div>
 </div>
-  <div style="display: flex; justify-content: space-between; margin-top: 20px;">
+  <div style="display: flex; justify-content: space-between; margin-top: 20px; height: 30px; ">
     <a href="/jobs/<%= job._id %>" class="btn-secondary">Back to Job</a>
-    <form action="/jobs/<%= job._id %>/complete" method="POST">
-      <button class="btn-primary">Finalize Checkpoints</button>
-    </form>
+    
   </div>
   
   <div class="footer">
-    <p>© 2025 Checkpoint Management System</p>
+    <p>© 2025 Workly</p>
   </div>
 </div>
 

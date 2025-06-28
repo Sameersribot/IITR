@@ -1,19 +1,20 @@
 const express = require("express")
-const app = express()
 const path = require("path")
 const ejsMate = require("ejs-mate")
 const mongoose = require("mongoose")
 const mongo_url = "mongodb+srv://admin:lGLO2T8SYL57vJFL@cluster0.yj83q.mongodb.net/?retryWrites=true&w=majority&appName=Cluster"
+const session = require("express-session")
+const MongoStore = require('connect-mongo');
 const flash = require("connect-flash")
 const { isLoggedin } = require("./middleware.js")
 const ExpressError = require("./utils/ExpressError.js")
-const session = require("express-session")
 const passport = require("passport")
 const localStrategy = require("passport-local")
 const User=require("./models/user.js")
 const Job=require("./models/job.js")
 const Checkpoint = require('./models/checkpoint.js');
 const wrapAsync = require("./utils/wrapAsync.js")
+const app = express()
 main()
     .then(() => {
         console.log("connected to db")
@@ -36,47 +37,78 @@ app.use(express.urlencoded({ extended: true }))
 app.use(express.static(path.join(__dirname, "/public")))
 app.engine("ejs", ejsMate)
 
+const store = MongoStore.create({
+  mongoUrl: mongo_url,
+  collectionName: 'sessions',
+  crypto: {
+    secret: "mysupersecretcode"
+  },
+  touchAfter: 24 * 3600
+});
+store.on("err",()=>{
+    console.log("some error occured")
+})
+
 const sessionOptions = {
-    
-    secret:"mysupersecretcode",
-    resave: false,
-    saveUninitialized: true
+  store,
+  name: 'workly.sid',
+  secret: "mysupersecretcode",
+  resave: false,
+  saveUninitialized: false, 
+  cookie: {
+    httpOnly: true,
+    secure: process.env.NODE_ENV === 'production',
+    maxAge: 1000 * 60 * 60 * 24 * 7,
+    sameSite: 'lax'
+  }
+};
 
-}
-
-app.use(session(sessionOptions));
+app.use(session(sessionOptions))
+app.use(passport.initialize())
+app.use(passport.session())
 app.use(flash())
 
 
-app.use(passport.initialize())
-app.use(passport.session())
+
+
 passport.use(new localStrategy(User.authenticate()))
 passport.serializeUser(User.serializeUser());
 passport.deserializeUser(User.deserializeUser());
 
 
 app.use((req, res, next) => {
+    res.locals.success = req.flash("success")
     res.locals.error = req.flash("error")
-    res.locals.sucess = req.flash("sucess")
     res.locals.currUser = req.user;
     next()
 })
 
 app.get("/", wrapAsync(async(req, res) => {
-    const jobs = await Job.find({}) .populate('postedBy', 'username') // Populate the poster's username
+    const jobs = await Job.find({}) .populate('postedBy', 'username') 
     .sort({ createdAt: -1 });
     
     res.render("listings/index.ejs", { jobs });
 }));
 
-app.get("/payment", async(req, res) => {
-    const checkpoints = await Checkpoint.find()
-    .populate('dependencies')
-    .populate('jobId');
-    res.render("listings/payment.ejs",{checkpoints})
+
+
+app.get("/payment/:id", async(req, res) => {
+    try {
+        const jobId = req.params.id;
+        
+        // Fetch checkpoints for this specific job ID
+        const checkpoints = await Checkpoint.find({ jobId: jobId })
+            .populate('dependencies')
+            .populate('jobId');
+            
+        res.render("listings/payment.ejs", { checkpoints });
+    } catch (error) {
+        console.error(error);
+        res.status(500).send("Internal Server Error");
+    }
 })
 app.get("/postedjob", async (req, res) => {
-    const jobs = await Job.find({}) .populate('postedBy', 'username') // Populate the poster's username
+    const jobs = await Job.find({}) .populate('postedBy', 'username') 
     .sort({ createdAt: -1 });
     
     res.render("listings/posted.ejs", { jobs });
@@ -91,15 +123,16 @@ app.get("/postjob", isLoggedin, (req, res) => {
 app.get("/jobs/:id", wrapAsync(async (req, res) => {
     const job = await Job.findById(req.params.id)
         .populate('postedBy', 'username email createdAt');
-    
+    const checkpoints = await Checkpoint.find()
+    .populate('dependencies')
+    .populate('jobId');
     if (!job) {
         req.flash('error', 'Job not found');
         return res.redirect('/');
     }
     
-    res.render("listings/view.ejs", { job });
+    res.render("listings/view.ejs", { job,checkpoints });
 }));
-// View Single Checkpoint Route
 
 app.post('/checkpoints',  async (req, res) => {
     try {
@@ -114,17 +147,17 @@ app.post("/signup", wrapAsync(async (req, res, next) => {
     try {
         const { username, email, password } = req.body;
         
-        // Create user using passport-local-mongoose's register method
+        
         const registeredUser = await User.register(
-            { username, email }, // Plain object, not User instance
+            { username, email }, 
             password
         );
 
-        console.log("Registered user:", registeredUser); // Add this for debugging
+        
         
         req.login(registeredUser, (err) => {
             if (err) return next(err);
-            req.flash("success", "Welcome to GreenApp!");
+            req.flash("success", "Welcome to workly!");
             res.redirect("/");
         });
     } catch (e) {
@@ -161,14 +194,14 @@ app.post('/jobs', wrapAsync(async (req, res) => {
 app.get("/checkpoint/:id",isLoggedin, async (req, res) => {
     const job = await Job.findById(req.params.id)
         .populate('postedBy', 'username email createdAt')
-        .populate('checkpoints'); // Add this population
+        .populate('checkpoints'); 
 
     if (!job) {
         req.flash('error', 'Job not found');
         return res.redirect('/');
     }
     
-    // Get available checkpoints (optional)
+   
     const availableCheckpoints = await Checkpoint.find({
         jobId: req.params.id,
         _id: { $nin: job.checkpoints.map(cp => cp._id) }
@@ -179,15 +212,14 @@ app.get("/checkpoint/:id",isLoggedin, async (req, res) => {
         availableCheckpoints
     });
 });
-// Add these routes after your existing checkpoints routes
 
-// Edit Checkpoint Route (GET - For fetching checkpoint data)
+
 app.get("/checkpoints/:id", wrapAsync(async (req, res) => {
     const checkpoint = await Checkpoint.findById(req.params.id);
     res.json(checkpoint);
 }));
 
-// Update Checkpoint Route (PUT)
+
 app.put("/checkpoints/:id", wrapAsync(async (req, res) => {
     const { id } = req.params;
     const { name, type, description, price, commitDependencies = [], jobId } = req.body;
@@ -204,8 +236,7 @@ app.put("/checkpoints/:id", wrapAsync(async (req, res) => {
     res.redirect(`/checkpoint/${jobId}`);
 }));
 
-// Delete Checkpoint Route (DELETE)
-// Improved Delete Route
+
 app.delete("/checkpoints/:id", wrapAsync(async (req, res) => {
     try {
         const { id } = req.params;
@@ -237,61 +268,76 @@ app.post("/jobs/:id/refresh-checkpoints", wrapAsync(async (req, res) => {
     res.json(job.checkpoints);
 }));
 app.post("/submitcheckpoints", wrapAsync(async (req, res) => {
-    // Destructure giturl from request body
+    
     const { name, type, description, price, jobId, giturl } = req.body;
     
-    // Validate giturl format
+   
     if (!giturl || !giturl.match(/https:\/\/github.com\/.*\/commit\/[a-f0-9]{40}/)) {
         throw new ExpressError(400, 'Valid GitHub commit URL is required');
     }
 
-    // Handle commit dependencies
+  
     const commitDependencies = Array.isArray(req.body.commitDependencies) 
         ? req.body.commitDependencies 
         : [req.body.commitDependencies];
 
-    // Create new checkpoint with giturl
     const newCheckpoint = new Checkpoint({
         name,
         type,
         description,
         price: parseFloat(price),
-        giturl, // Include giturl here
+        giturl, 
         commitDependencies: commitDependencies.filter(Boolean),
         jobId
     });
 
-    // Validate against job budget
+  
     const job = await Job.findById(jobId);
     if (newCheckpoint.price > job.budget) {
         throw new ExpressError(400, `Price exceeds job budget of $${job.budget}`);
     }
 
-    // Save and update job
     await newCheckpoint.save();
     await Job.findByIdAndUpdate(jobId, { $push: { checkpoints: newCheckpoint._id } });
 
     req.flash('success', 'Checkpoint created successfully!');
     res.redirect(`/checkpoint/${jobId}`);
 }));
-app.post("/login", 
-    passport.authenticate("local", { 
-      failureRedirect: '/login',
-      failureFlash: true,
-      successRedirect: '/',
-      successFlash: "Welcome back!"
-    })
-  );
+app.post("/login", (req, res, next) => {
+  passport.authenticate("local", (err, user, info) => {
+    if (err) return next(err);
+    if (!user) {
+      req.flash("error", info.message || "Invalid credentials");
+      return res.redirect("/login");
+    }
+    req.logIn(user, (err) => {
+      if (err) return next(err);
+      req.flash("success", `Welcome back, ${user.username}!`);
+      return res.redirect("/");
+    });
+  })(req, res, next);
+});
 
-  app.post("/logout", (req, res, next) => {
-    req.logOut((err) => {
-        if (err) {
-            return next(err)
-        }
-        req.flash("sucess", "Logout sucessfull")
-        res.redirect("/")
-    })
-})  
+app.post("/logout", (req, res, next) => {
+  req.logOut((err) => {
+    if (err) return next(err);
+    req.flash("success", "Logout successful"); 
+    res.redirect("/");
+  });
+});
+app.get('/session-debug', (req, res) => {
+  // Get raw session from store
+  store.get(req.sessionID, (err, session) => {
+    res.json({
+      sessionID: req.sessionID,
+      sessionFromStore: session,
+      sessionFromReq: req.session,
+      flashContents: req.flash(),
+      user: req.user
+    });
+  });
+});
+ 
 app.all("*", (req, res, next) => {
     next(new ExpressError(404, "page not found"))
 })

@@ -37,7 +37,7 @@
 }
 
 
-.alert-sucess{
+.alert-success{
     padding: 15px;
     background-color: green;
     color: white;
@@ -51,7 +51,7 @@
     font-size: 16px;
 }
 
-.alert-sucess .close-btn {
+.alert-success .close-btn {
     position: absolute;
     top: 5px;
     right: 10px;
@@ -62,8 +62,7 @@
     background: none;
 }
 
-.alert-sucess .close-btn:hover {
+.alert-success .close-btn:hover {
     color: black;
-    
 }
 
